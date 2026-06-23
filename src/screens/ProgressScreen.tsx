@@ -13,7 +13,8 @@ export function ProgressScreen() {
     const total = meeting.minMembers ?? TOTAL;
     const t1 = setTimeout(() => setResponded(Math.min(total, 4)), 1200);
     const t2 = setTimeout(() => setResponded(total), 2400);
-    const t3 = setTimeout(() => goto("finding"), 3400);
+    // 전원 응답 도달 → "모두 다 골랐어요!" 화면으로 (거기서 추천 로딩 finding으로 진입)
+    const t3 = setTimeout(() => goto("all-done"), 3400);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);

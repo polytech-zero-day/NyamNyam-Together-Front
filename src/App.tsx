@@ -4,13 +4,14 @@ import { NavBar } from "./components/NavBar";
 import { IntroScreen } from "./screens/IntroScreen";
 import { LoginConsentScreen } from "./screens/LoginConsentScreen";
 import { OnboardingScreen } from "./screens/OnboardingScreen";
+import { ParticipantOnboardingScreen } from "./screens/ParticipantOnboardingScreen";
 import { CreateMeetingScreen } from "./screens/CreateMeetingScreen";
 import { InviteGeneratedScreen } from "./screens/InviteGeneratedScreen";
 import { InviteInputScreen } from "./screens/InviteInputScreen";
-import { AlcoholScreen } from "./screens/AlcoholScreen";
-import { BudgetScreen } from "./screens/BudgetScreen";
+import { TasteHubScreen } from "./screens/TasteHubScreen";
 import { FoodScreen } from "./screens/FoodScreen";
-import { MoodScreen } from "./screens/MoodScreen";
+import { DoneScreen } from "./screens/DoneScreen";
+import { AllDoneScreen } from "./screens/AllDoneScreen";
 import { WaitScreen } from "./screens/WaitScreen";
 import { FindingScreen } from "./screens/FindingScreen";
 import { RelaxedScreen } from "./screens/RelaxedScreen";
@@ -26,22 +27,24 @@ function ScreenSwitcher() {
       return <LoginConsentScreen />;
     case "onboarding":
       return <OnboardingScreen />;
+    case "participant-onboarding":
+      return <ParticipantOnboardingScreen />;
     case "create-meeting":
       return <CreateMeetingScreen />;
     case "invite-generated":
       return <InviteGeneratedScreen />;
     case "invite-input":
       return <InviteInputScreen />;
-    case "q-alcohol":
-      return <AlcoholScreen />;
-    case "q-budget":
-      return <BudgetScreen />;
+    case "q-hub":
+      return <TasteHubScreen />;
     case "q-food":
       return <FoodScreen />;
-    case "q-mood":
-      return <MoodScreen />;
+    case "q-done":
+      return <DoneScreen />;
     case "wait-others":
       return <WaitScreen />;
+    case "all-done":
+      return <AllDoneScreen />;
     case "finding":
       return <FindingScreen />;
     case "relaxed":

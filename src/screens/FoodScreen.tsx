@@ -1,28 +1,40 @@
+import { useState } from "react";
 import { Button } from "@toss/tds-mobile";
+import { colors } from "@toss/tds-colors";
 import { useApp } from "../store";
-import { BRAND_ORANGE } from "../components/icons";
 import { FOOD_CATEGORIES, type FoodCategory } from "../types";
 
+const MAX_PICK = 3;
+
 const EMOJI: Record<FoodCategory, string> = {
-  "한식": "🍚",
-  "고기": "🥩",
-  "일식": "🍣",
-  "중식": "🥟",
-  "양식": "🍝",
-  "아시안": "🍜",
-  "분식": "🍢",
-  "간편식": "🥪",
-  "치킨·안주": "🍗",
+  한식: "🍲",
+  일식: "🍣",
+  양식: "🍔",
+  중식: "🥡",
+  분식: "🍢",
+  아시안: "🍜",
+  "고기·구이": "🥩",
+  "카페·브런치": "🥗",
 };
 
+// 음식 취향 (사용자_투표_6/7) — 허브(q-hub)에서 진입하는 풀스크린 그리드. 최대 3개 다중선택.
+// 선택은 로컬 draft로 다루고 "다음"에서만 store에 커밋한다("이전"은 취소).
 export function FoodScreen() {
   const { participant, patchParticipant, goto } = useApp();
-  const foods = participant.foods;
+  const [draft, setDraft] = useState<FoodCategory[]>(participant.foods);
+  const ready = draft.length > 0;
 
   const toggle = (c: FoodCategory) => {
-    patchParticipant({
-      foods: foods.includes(c) ? foods.filter((x) => x !== c) : [...foods, c],
+    setDraft((prev) => {
+      if (prev.includes(c)) return prev.filter((x) => x !== c);
+      if (prev.length >= MAX_PICK) return prev; // 최대 3개
+      return [...prev, c];
     });
+  };
+
+  const submit = () => {
+    patchParticipant({ foods: draft });
+    goto("q-hub");
   };
 
   return (
@@ -35,45 +47,40 @@ export function FoodScreen() {
         boxSizing: "border-box",
       }}
     >
-      <p style={{ fontSize: 13, color: "#8B95A1", fontWeight: 600 }}>3 / 4</p>
       <h1
         style={{
-          marginTop: 8,
           fontSize: 22,
           fontWeight: 800,
-          color: "#191F28",
+          color: colors.grey900,
           letterSpacing: "-0.02em",
-          lineHeight: 1.35,
         }}
       >
-        어떤 음식을 좋아하세요?
+        어떤 메뉴를 좋아하나요?
       </h1>
-      <p style={{ marginTop: 12, fontSize: 14, color: "#8B95A1" }}>
-        여러 개 골라도 좋아요. (선호일 뿐, 거르지 않아요)
+      <p style={{ marginTop: 8, fontSize: 15, color: colors.grey600 }}>
+        {MAX_PICK}개까지 고를 수 있어요
       </p>
 
       <div
         style={{
           marginTop: 24,
           display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: 10,
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
         }}
       >
         {FOOD_CATEGORIES.map((c) => {
-          const selected = foods.includes(c);
+          const selected = draft.includes(c);
           return (
             <button
               key={c}
               type="button"
               onClick={() => toggle(c)}
               style={{
-                border: selected
-                  ? `1.5px solid ${BRAND_ORANGE}`
-                  : "1.5px solid #F2F4F6",
-                background: selected ? "#FFF6EE" : "#fff",
-                borderRadius: 14,
-                padding: "16px 8px",
+                border: "none",
+                background: selected ? colors.grey200 : colors.grey50,
+                borderRadius: 16,
+                padding: "22px 8px",
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
@@ -86,9 +93,9 @@ export function FoodScreen() {
               </span>
               <span
                 style={{
-                  fontSize: 14,
+                  fontSize: 15,
                   fontWeight: selected ? 700 : 500,
-                  color: selected ? BRAND_ORANGE : "#333D4B",
+                  color: colors.grey800,
                 }}
               >
                 {c}
@@ -100,15 +107,31 @@ export function FoodScreen() {
 
       <div style={{ flex: 1 }} />
 
-      <Button
-        color="primary"
-        variant="fill"
-        size="xlarge"
-        display="block"
-        onClick={() => goto("q-mood")}
-      >
-        다음
-      </Button>
+      <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <Button
+            color="dark"
+            variant="weak"
+            size="xlarge"
+            display="block"
+            onClick={() => goto("q-hub")}
+          >
+            이전
+          </Button>
+        </div>
+        <div style={{ flex: 1 }}>
+          <Button
+            color="primary"
+            variant="fill"
+            size="xlarge"
+            display="block"
+            disabled={!ready}
+            onClick={submit}
+          >
+            다음
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -25,8 +25,9 @@ interface MeetingForm {
 
 interface ParticipantForm {
   alcohol?: Alcohol;
-  budgetMin: number;
-  budgetMax: number;
+  // 예산은 선택 전엔 미설정(undefined). 선택 시 BUDGET_TIERS의 min~max(원)가 채워진다.
+  budgetMin?: number;
+  budgetMax?: number;
   foods: FoodCategory[];
   mood?: Mood;
 }
@@ -45,13 +46,23 @@ interface AppState {
 
 const AppCtx = createContext<AppState | null>(null);
 
+// 진입 분기: 초대 링크(?groupId=)로 들어오면 "참여자", 아니면 "생성자".
+//   · groupId 있음 → 참여자 → participant-onboarding 부터 시작
+//   · groupId 없음 → 생성자 → 기존대로 intro 부터 시작
+// TODO(backend): 지금은 groupId 존재 여부만 보는 목업이다. 백엔드 연동 시
+//   여기(또는 participant-onboarding 진입 시점)에서 groupId 유효성/마감 여부를
+//   검증하고, 잘못된 링크면 안내 화면으로 보내도록 교체한다.
+function getInitialScreen(): ScreenId {
+  if (typeof window === "undefined") return "intro";
+  const groupId = new URLSearchParams(window.location.search).get("groupId");
+  return groupId != null && groupId !== "" ? "participant-onboarding" : "intro";
+}
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  const [screen, setScreen] = useState<ScreenId>("intro");
-  const [history, setHistory] = useState<ScreenId[]>([]);
+  const [screen, setScreen] = useState<ScreenId>(getInitialScreen);
+  const [, setHistory] = useState<ScreenId[]>([]);
   const [meeting, setMeeting] = useState<MeetingForm>({});
   const [participant, setParticipant] = useState<ParticipantForm>({
-    budgetMin: 20000,
-    budgetMax: 40000,
     foods: [],
   });
   const [voted, setVoted] = useState<string | null>(null);

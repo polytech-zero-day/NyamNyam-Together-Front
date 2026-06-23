@@ -47,7 +47,7 @@ export function InviteInputScreen() {
       <button
         type="button"
         disabled={!ready}
-        onClick={() => goto("q-alcohol")}
+        onClick={() => goto("participant-onboarding")}
         style={{
           position: "sticky",
           bottom: 0,

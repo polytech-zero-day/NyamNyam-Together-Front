@@ -2,7 +2,25 @@
   "permissions": {
     "allow": [
       "Bash(npx tsc *)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(node -e \"const c=require\\('@toss/tds-colors'\\); console.log\\('keys:', Object.keys\\(c\\)\\); console.log\\('colors keys sample:', c.colors? Object.keys\\(c.colors\\).slice\\(0,60\\): 'no colors'\\); console.log\\('adaptive?', !!c.adaptive\\);\")",
+      "Bash(cd *)",
+      "Bash(echo \"EXIT tsc: $?\")",
+      "Bash(npm run *)",
+      "Bash(echo \"EXIT lint: $?\")",
+      "Read(//tmp/**)",
+      "Bash(npx vite *)",
+      "Bash(echo \"BUILD_EXIT=$?\")",
+      "Bash(node *)",
+      "Bash(pkill -f \"vite preview --port 4318\")",
+      "Bash(pkill -f \"remote-debugging-port=9223\")",
+      "Bash(xargs basename -a)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('main:',d.get\\('main'\\)\\); print\\('module:',d.get\\('module'\\)\\); print\\('types:',d.get\\('types'\\)\\); print\\('exports keys:', list\\(d.get\\('exports',{}\\).keys\\(\\)\\)[:10]\\)\")",
+      "Bash(pkill -f \"vite preview --port 4319\")",
+      "Bash(pkill -f \"remote-debugging-port=9224\")",
+      "Bash(pkill -f \"vite preview --port 4320\")",
+      "Bash(pkill -f \"remote-debugging-port=9225\")",
+      "Bash(grep -rhoiE \"font-family:[^;}\\\\\"']{0,60}\" node_modules/@toss/tds-mobile/dist node_modules/@toss/tds-mobile-ait/dist)"
     ]
   }
 }
