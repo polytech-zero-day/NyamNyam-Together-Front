@@ -11,6 +11,7 @@ import {
   useSetSort,
   useStage2Vote,
 } from "./api";
+import { openExternal, shareText } from "./lib/appActions";
 import { NavBar } from "./components/NavBar";
 import { IntroScreen } from "./screens/IntroScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
@@ -169,10 +170,16 @@ function ScreenRouter() {
       {screen === "final-result" && (
         <FinalResultScreen
           results={ready ? voteResults : undefined}
-          onShare={() => console.log("[final-result] 공유하기 (미연결)")}
+          onShare={() => {
+            const winner = voteResults[0]?.restaurant;
+            const msg = winner
+              ? `이번 모임 장소는 '${winner.name}'으로 정해졌어요! · 냠냠투게더`
+              : "냠냠투게더에서 모임 장소를 정해보세요!";
+            void shareText(msg);
+          }}
           onShowMap={(recId) => {
             const url = mapUrlByRec.get(recId);
-            if (url && typeof window !== "undefined") window.open(url, "_blank");
+            if (url) void openExternal(url);
           }}
         />
       )}

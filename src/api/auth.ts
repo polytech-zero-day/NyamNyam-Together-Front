@@ -4,22 +4,11 @@
 //   · 참여자: POST /auth/anon → 익명 JWT(음수 id)
 import { appLogin } from "@apps-in-toss/web-framework";
 import { ENABLE_DEV_LOGIN_FALLBACK } from "../config/env";
+import { isInTossApp } from "../lib/tossEnv";
 import { authApi } from "./endpoints";
 import { clearToken, getToken, hasToken, setToken } from "./tokenStore";
 
 export { clearToken, getToken, hasToken };
-
-/**
- * 토스 앱(WebView) 안에서 실행 중인지.
- * 주의: browser-shim이 PC 브라우저에서 ReactNativeWebView를 mock 주입하므로, 그 플래그를
- * 먼저 보고 제외해야 한다(안 그러면 PC에서 appLogin이 영영 pending → 멈춤).
- */
-function isInTossApp(): boolean {
-  if (typeof window === "undefined") return false;
-  const w = window as unknown as { ReactNativeWebView?: unknown; __NYAM_BROWSER_SHIM__?: boolean };
-  if (w.__NYAM_BROWSER_SHIM__) return false; // PC 브라우저(shim) → 토스 앱 아님
-  return w.ReactNativeWebView != null;
-}
 
 /** 참여자 익명 토큰 확보(이미 토큰이 있으면 그대로 사용). */
 export async function ensureParticipantToken(): Promise<void> {
