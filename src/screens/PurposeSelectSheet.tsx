@@ -7,12 +7,15 @@ import { getPortalRoot } from "../lib/portal";
 import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-01 모임 목적 선택 바텀시트. CreateMeetingScreen의 "모임 목적" 행을 누르면 열림.
-// MVP는 "친구들과의 모임"만 활성, 나머지 3개는 시안엔 있지만 비활성("준비중")으로 둔다 (CLAUDE.md).
-const PURPOSE_OPTIONS: { id: Purpose; disabled?: boolean }[] = [
-  { id: "친구들과의 모임" },
-  { id: "연인과의 데이트", disabled: true },
-  { id: "부모님과의 식사", disabled: true },
-  { id: "기타", disabled: true },
+// 4개 목적 모두 단일선택 가능.
+// ⚠️ CLAUDE.md 규칙("MVP는 친구 모임만 완성, 나머지는 준비중/비활성")과는 어긋난다.
+//    나머지 목적(연인/부모님/기타)은 전용 질문 세트·추천 로직이 아직 없어서, 선택해도
+//    이후 흐름은 친구 모임과 동일하게 진행된다(목적값만 저장될 뿐 분기 없음).
+const PURPOSE_OPTIONS: Purpose[] = [
+  "친구들과의 모임",
+  "연인과의 데이트",
+  "부모님과의 식사",
+  "기타",
 ];
 
 interface Props {
@@ -21,8 +24,7 @@ interface Props {
 
 export function PurposeSelectSheet({ onClose }: Props) {
   const { patchMeeting, meeting } = useApp();
-  // 시안(06)처럼 유일한 활성 옵션인 "친구들과의 모임"을 기본 선택해 둔다.
-  // (MVP는 친구 모임 목적만 활성 — CLAUDE.md)
+  // 시안(06)처럼 "친구들과의 모임"을 기본 선택해 둔다(가장 흔한 목적).
   const [selected, setSelected] = useState<Purpose | null>(
     meeting.purpose ?? "친구들과의 모임",
   );
@@ -48,10 +50,10 @@ export function PurposeSelectSheet({ onClose }: Props) {
       }
     >
       <List>
-        {PURPOSE_OPTIONS.map(({ id, disabled }) => (
+        {/* 4개 목적 모두 활성 — 한 항목 고르면 기존 선택이 풀리고 그것만 체크되는 단일선택. */}
+        {PURPOSE_OPTIONS.map((id) => (
           <ListRow
             key={id}
-            disabled={disabled}
             contents={<ListRow.Texts type="1RowTypeA" top={id} />}
             right={
               selected === id ? (
@@ -63,7 +65,7 @@ export function PurposeSelectSheet({ onClose }: Props) {
                 />
               ) : undefined
             }
-            onClick={() => !disabled && setSelected(id)}
+            onClick={() => setSelected(id)}
           />
         ))}
       </List>
