@@ -118,12 +118,15 @@ export function FinalResultScreen({
             }}
           />
         </div>
+        {/* 다른 화면 하단 버튼(예: Welcome 토스 로그인)과 동일한 Button + display="block".
+            display="full" 은 화면 가장자리에 붙는 풀블리드 변형이라 border-radius 가 0 이 된다 —
+            block 은 부모(여기선 flex:1) 너비를 채우면서 기본 라운드(16px)를 유지한다. */}
         <div style={{ flex: 1 }}>
           <Button
             color="primary"
             variant="fill"
             size="xlarge"
-            display="full"
+            display="block"
             onClick={() => {
               if (onShare) onShare();
               else console.log("[final-result] 공유하기 (미연결)");
