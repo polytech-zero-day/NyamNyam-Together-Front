@@ -95,8 +95,11 @@ export function VoteScreen({
       </div>
 
       {/* 시안 단일 CTA. 바깥 컨테이너를 뷰포트 높이로 고정해 카드 영역만 스크롤되므로
-          여기는 일반(비-fixed) BottomCTA 로 충분하다. 카드 미선택 시엔 동작만 막는다. */}
+          여기는 일반(비-fixed) BottomCTA 로 충분하다.
+          BottomCTA.Single 은 CTAButtonProps 를 상속하므로 disabled 를 주면
+          미선택 시 TDS 가 자동으로 비활성(연한 주황) 스타일을 적용한다(CreateMeeting 저장과 동일). */}
       <BottomCTA.Single
+        disabled={selectedId == null}
         onClick={() => {
           if (selectedId == null) return;
           if (onVote) onVote(selectedId);
