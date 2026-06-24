@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-02 마감 날짜 선택 바텀시트.
 // 시안 21:3775(모임 9)은 임시로 역 리스트가 박혀 있어 무시 — 년/월/일 선택으로 구현.
@@ -68,16 +63,7 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
           마감 날짜를 골라주세요.
         </BottomSheet.HeaderDescription>
       }
-      cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton color="primary" onClick={handleNext}>
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
-      }
+      cta={<SheetDoubleCTA onClose={onClose} onNext={handleNext} />}
     >
       <div style={{ padding: "8px 24px 16px" }}>
         <p

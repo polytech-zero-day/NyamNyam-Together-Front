@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { REGIONS } from "../data/stations";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 interface Props {
   onClose: () => void;
@@ -38,18 +33,11 @@ export function StationSelectSheet({ onClose }: Props) {
       portalContainer={getPortalRoot()}
       header={<BottomSheet.Header>어느 역에서 모일까요?</BottomSheet.Header>}
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       {region == null ? (

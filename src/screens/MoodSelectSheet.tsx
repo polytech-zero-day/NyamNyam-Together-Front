@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { MOOD_OPTIONS, type Mood } from "../types";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-08 분위기 선택 (4지선다, 단일선택).
 // CLAUDE.md 기준 MVP 가중치 0(추천 점수에 반영 X)이라 데이터는 받아도 추천 결과는 안 바뀜.
@@ -37,18 +32,11 @@ export function MoodSelectSheet({ onClose }: Props) {
       portalContainer={getPortalRoot()}
       header={<BottomSheet.Header>분위기</BottomSheet.Header>}
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       <List>

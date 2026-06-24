@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-02 최소 인원 선택 바텀시트. CreateMeetingScreen의 "최소 인원" 행을 누르면 열림.
 // 시안 옵션: 3·4·5·6·7명 + "8명 이상". 8 이상은 8로 저장하고 라벨만 다르게 표시.
@@ -49,18 +44,11 @@ export function MembersSelectSheet({ onClose }: Props) {
         </BottomSheet.HeaderDescription>
       }
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       <List>

@@ -1,14 +1,9 @@
 import { useState } from "react";
-import {
-  BottomSheet,
-  Checkbox,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { BottomSheet, Checkbox, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { BUDGET_TIERS, type BudgetTierLabel } from "../types";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-06 예산 선택 (구간 다중선택 → min/max 환산).
 // CLAUDE.md 3.3 / A안: 벌어진 선택(예: "1만 이하" + "3~4만")도 중간 구간을 포함한 하나의 연속 범위로
@@ -73,18 +68,11 @@ export function BudgetSelectSheet({ onClose }: Props) {
         </BottomSheet.HeaderDescription>
       }
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected.size === 0}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected.size === 0}
+        />
       }
     >
       <List>

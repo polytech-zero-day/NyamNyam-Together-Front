@@ -3,13 +3,13 @@ import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomSheet,
-  CTAButton,
   List,
   ListRow,
   SegmentedControl,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-02 마감 시간 선택 바텀시트.
 // 시안 21:3997(모임 10)은 임시로 역 리스트가 박혀 있어 무시 — 오전/오후 + 시(時) 선택으로 구현.
@@ -76,18 +76,11 @@ export function DeadlineTimeSelectSheet({ onClose }: Props) {
         </BottomSheet.HeaderDescription>
       }
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={hour == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={hour == null}
+        />
       }
     >
       <div style={{ padding: "8px 24px 16px" }}>

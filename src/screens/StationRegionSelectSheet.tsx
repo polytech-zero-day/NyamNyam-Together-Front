@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { REGIONS, type RegionId } from "../data/stations";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 interface Props {
   onClose: () => void;
@@ -48,18 +43,11 @@ export function StationRegionSelectSheet({ onClose, onNext }: Props) {
         </BottomSheet.HeaderDescription>
       }
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       <List>

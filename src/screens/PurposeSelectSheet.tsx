@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import type { Purpose } from "../types";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-01 모임 목적 선택 바텀시트. CreateMeetingScreen의 "모임 목적" 행을 누르면 열림.
 // MVP는 "친구들과의 모임"만 활성, 나머지 3개는 시안엔 있지만 비활성("준비중")으로 둔다 (CLAUDE.md).
@@ -43,18 +38,11 @@ export function PurposeSelectSheet({ onClose }: Props) {
       portalContainer={getPortalRoot()}
       header={<BottomSheet.Header>모임 목적</BottomSheet.Header>}
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       <List>

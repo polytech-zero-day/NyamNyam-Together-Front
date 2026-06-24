@@ -1,15 +1,10 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import {
-  Asset,
-  BottomSheet,
-  CTAButton,
-  List,
-  ListRow,
-} from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { ALCOHOL_OPTIONS, type Alcohol } from "../types";
 import { getPortalRoot } from "../lib/portal";
+import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
 // F-05 술자리 선택 (3지선다, 단일선택).
 // id ("drink"/"around"/"uncomfortable") 는 추천엔진의 술→장소타입 매핑(CLAUDE.md 3.2) 에 그대로 쓰임.
@@ -36,18 +31,11 @@ export function AlcoholSelectSheet({ onClose }: Props) {
       portalContainer={getPortalRoot()}
       header={<BottomSheet.Header>술자리</BottomSheet.Header>}
       cta={
-        <BottomSheet.DoubleCTA>
-          <CTAButton color="dark" variant="weak" onClick={onClose}>
-            닫기
-          </CTAButton>
-          <CTAButton
-            color="primary"
-            disabled={selected == null}
-            onClick={handleNext}
-          >
-            다음
-          </CTAButton>
-        </BottomSheet.DoubleCTA>
+        <SheetDoubleCTA
+          onClose={onClose}
+          onNext={handleNext}
+          nextDisabled={selected == null}
+        />
       }
     >
       <List>
