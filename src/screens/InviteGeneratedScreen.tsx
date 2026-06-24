@@ -6,6 +6,7 @@ import {
   IconButton,
   Text,
   TextField,
+  useToast,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import checkFillIcon from "../assets/check-fill-circle.svg";
@@ -16,14 +17,25 @@ const DUMMY_INVITE_LINK = "https://apps-in-toss.com/nyamnyam?groupId=demo123";
 
 export function InviteGeneratedScreen() {
   const { goto, back } = useApp();
+  const { openToast } = useToast();
 
   function handleCopy() {
-    // 웹뷰/브라우저 양쪽에서 동작. 실패해도 조용히 무시(데모 단계).
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(DUMMY_INVITE_LINK).catch(() => {
-        // TODO: 토스트로 실패 안내
-      });
+    // 웹뷰/브라우저 양쪽에서 동작. 복사 성공 시에만 TDS 토스트로 피드백.
+    if (typeof navigator === "undefined" || navigator.clipboard == null) {
+      // 클립보드 미지원 환경 — 데모 흐름은 막지 않고 토스트만 생략.
+      return;
     }
+    navigator.clipboard
+      .writeText(DUMMY_INVITE_LINK)
+      .then(() => {
+        openToast("클립보드에 복사됐어요", {
+          icon: "icon-check",
+          iconType: "circle",
+        });
+      })
+      .catch(() => {
+        // 사용자가 거부했거나 실패 — 토스트 생략(데모 흐름 유지).
+      });
   }
 
   return (
