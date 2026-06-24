@@ -9,7 +9,7 @@ import {
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
-import loginConsentIcon from "../assets/login-consent-icon.svg";
+import { APP_LOGO_SRC } from "../components/icons";
 
 // F-04 호스트 토스 로그인 동의 화면.
 // 상단: 아이콘 + 타이틀("냠냠투게더에서 토스로 로그인할까요?").
@@ -59,11 +59,12 @@ export function LoginConsentScreen() {
         }}
       >
         <div style={{ padding: "24px 28px 0" }}>
+          {/* 상단 네비와 동일한 앱 로고. 이 화면에선 큰 원형으로 — radius=지름/2 로 원 처리. */}
           <Asset.Image
-            src={loginConsentIcon}
-            frameShape={{ width: 60, height: 60 }}
+            src={APP_LOGO_SRC}
+            frameShape={{ width: 60, height: 60, radius: 30 }}
             scaleType="fit"
-            alt=""
+            alt="냠냠투게더 로고"
             backgroundColor="transparent"
           />
         </div>

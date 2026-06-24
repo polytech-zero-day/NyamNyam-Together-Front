@@ -1,4 +1,10 @@
+import { Asset } from "@toss/tds-mobile";
+
 export const BRAND_ORANGE = "#FF5F00";
+
+// 앱 로고(주황 배경 + 흰 포크·스푼·위치핀). public/nyamnyam-logo.png 사용.
+// NavBar(작은 라운드 사각) · LoginConsent(큰 원형) 등 여러 곳이 같은 파일을 공유한다.
+export const APP_LOGO_SRC = "/nyamnyam-logo.png";
 
 export function ForkSpoonIcon({ size = 88, color = "#fff" }: { size?: number; color?: string }) {
   return (
@@ -99,23 +105,16 @@ function PinForkSpoon() {
   );
 }
 
+// 상단 네비 앱 로고. 첨부 로고(주황 배경 + 흰 포크·스푼·핀)를 정사각형으로 렌더한다.
+// 로고 PNG 자체에 주황 배경이 포함돼 있어 별도 배경 div 가 필요 없고, 라운드만 frameShape 로 준다.
 export function AppLogoMark({ size = 24 }: { size?: number }) {
   return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        background: BRAND_ORANGE,
-        borderRadius: 6,
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        verticalAlign: "middle",
-      }}
-    >
-      <svg width={size * 0.6} height={size * 0.6} viewBox="0 0 16 16" fill="none" aria-hidden>
-        <path d="M8 1l6 3v5l-6 3-6-3V4l6-3z" stroke="#fff" strokeWidth="1.4" />
-      </svg>
-    </div>
+    <Asset.Image
+      src={APP_LOGO_SRC}
+      frameShape={{ width: size, height: size, radius: 6 }}
+      scaleType="fit"
+      alt="냠냠투게더 로고"
+      backgroundColor="transparent"
+    />
   );
 }
