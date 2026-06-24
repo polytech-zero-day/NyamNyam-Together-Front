@@ -11,22 +11,27 @@ import {
 import { useApp } from "../store";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
-// F-03 모임 생성 완료. 호스트가 만든 모임의 초대 링크를 보여주고 공유하도록 유도.
-// 실제 링크 생성은 백엔드 연동 시 — 지금은 자리만 잡고 더미 링크로.
-const DUMMY_INVITE_LINK = "https://apps-in-toss.com/nyamnyam?groupId=demo123";
+// F-03 모임 생성 완료. 호스트가 만든 모임의 초대 링크(?groupId=sessionId)를 보여주고 공유하도록 유도.
+function buildInviteLink(sessionId: string | null): string {
+  if (!sessionId) return "";
+  if (typeof window === "undefined") return `?groupId=${sessionId}`;
+  return `${window.location.origin}${window.location.pathname}?groupId=${sessionId}`;
+}
 
 export function InviteGeneratedScreen() {
-  const { goto, back } = useApp();
+  const { goto, back, sessionId } = useApp();
   const { openToast } = useToast();
+  const inviteLink = buildInviteLink(sessionId);
 
   function handleCopy() {
+    if (!inviteLink) return;
     // 웹뷰/브라우저 양쪽에서 동작. 복사 성공 시에만 TDS 토스트로 피드백.
     if (typeof navigator === "undefined" || navigator.clipboard == null) {
       // 클립보드 미지원 환경 — 데모 흐름은 막지 않고 토스트만 생략.
       return;
     }
     navigator.clipboard
-      .writeText(DUMMY_INVITE_LINK)
+      .writeText(inviteLink)
       .then(() => {
         openToast("클립보드에 복사됐어요", {
           icon: "icon-check",
@@ -86,7 +91,7 @@ export function InviteGeneratedScreen() {
             variant="box"
             label="초대 링크"
             labelOption="sustain"
-            value={DUMMY_INVITE_LINK}
+            value={inviteLink}
             onChange={() => {
               // 읽기 전용 — 사용자가 직접 수정하지 않음
             }}

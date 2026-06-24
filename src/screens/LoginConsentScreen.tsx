@@ -1,4 +1,4 @@
-import { appLogin } from "@apps-in-toss/web-framework";
+import { useState } from "react";
 import {
   Asset,
   BottomSheet,
@@ -8,6 +8,7 @@ import {
   Top,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { loginAsHost } from "../api";
 import { getPortalRoot } from "../lib/portal";
 import { APP_LOGO_SRC } from "../components/icons";
 
@@ -19,30 +20,25 @@ import { APP_LOGO_SRC } from "../components/icons";
 // AIT 콘솔에 등록된 약관으로 토스 앱이 자동으로 띄운다. 여기 placeholder 행은
 // 그 자리(슬롯)만 시각화해두는 용도.
 export function LoginConsentScreen() {
-  const { goto, back } = useApp();
+  const { goto, back, setRole } = useApp();
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin() {
-    // 토스 웹뷰가 아닌 환경(PC 브라우저·dev·헤드리스)에서는 appLogin() 의 비동기
-    // 브리지 응답이 영영 오지 않아 promise 가 pending 으로 멈춘다(browser-shim 주석 참고).
-    // 이런 환경에선 네이티브 로그인을 건너뛰고 바로 다음 화면으로 진행한다.
-    // 실기기(ReactNativeWebView 존재)에서는 정상적으로 appLogin() 을 호출한다.
-    const isBrowserShim =
-      typeof window !== "undefined" && window.__NYAM_BROWSER_SHIM__ === true;
-    if (isBrowserShim) {
-      goto("create-meeting");
-      return;
-    }
-
+    if (loading) return;
+    setLoading(true);
     try {
-      const { authorizationCode } = await appLogin();
-      // TODO(backend): authorizationCode 를 서버에 보내 host userKey 발급 / 세션 생성
-      console.log("[host login] authorizationCode:", authorizationCode);
+      // 토스 앱: appLogin() → /auth/login. 그 외(PC/dev): dev-login 우회(api/auth.ts).
+      // 성공 시 host JWT가 토큰 저장소에 들어가 이후 requireToss 요청이 통과한다.
+      await loginAsHost();
+      setRole("host");
       goto("create-meeting");
     } catch (err) {
-      // 사용자가 거부했거나 SDK 호출 실패.
-      // 데모 흐름을 막지 않기 위해 다음 화면으로 그대로 진행.
       console.error("토스 로그인 실패:", err);
+      // 우회까지 막힌 경우(운영 빌드 등) — 데모 흐름 유지를 위해 진행하되 역할만 표시.
+      setRole("host");
       goto("create-meeting");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -97,7 +93,7 @@ export function LoginConsentScreen() {
               style={{
                 display: "flex",
                 justifyContent: "center",
-                padding: "8px 0 0",
+                  marginBottom: 10
               }}
             >
               <TextButton size="xsmall" variant="underline" onClick={back}>

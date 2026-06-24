@@ -11,6 +11,12 @@ import {
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { ALCOHOL_OPTIONS, type Alcohol } from "../types";
+import {
+  ALCOHOL_TO_DRINK,
+  foodsToCategories,
+  moodToBackend,
+  useStage1Vote,
+} from "../api";
 import { AlcoholSelectSheet } from "./AlcoholSelectSheet";
 import { BudgetSelectSheet } from "./BudgetSelectSheet";
 import { MoodSelectSheet } from "./MoodSelectSheet";
@@ -26,8 +32,9 @@ const ALCOHOL_LABELS: Record<Alcohol, string> = Object.fromEntries(
 ) as Record<Alcohol, string>;
 
 export function PreferenceFormScreen() {
-  const { participant, back, goto } = useApp();
+  const { participant, back, goto, sessionId } = useApp();
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
+  const stage1 = useStage1Vote(sessionId ?? "");
 
   const filledCount = [
     participant.alcohol,
@@ -39,6 +46,25 @@ export function PreferenceFormScreen() {
   const isComplete = filledCount === 4;
 
   const closeSheet = () => setOpenSheet(null);
+
+  // F-05~08 → 1차 투표(제약 응답) 전송 후 대기 화면으로.
+  async function handleSubmit() {
+    if (!isComplete || stage1.isPending) return;
+    if (!sessionId || participant.alcohol == null || participant.budgetMax == null) return;
+    try {
+      await stage1.mutateAsync({
+        drink: ALCOHOL_TO_DRINK[participant.alcohol],
+        budgetMin: participant.budgetMin,
+        budgetMax: participant.budgetMax,
+        categories: foodsToCategories(participant.foods),
+        mood: moodToBackend(participant.mood),
+      });
+      goto("q-done");
+    } catch (err) {
+      console.error("응답 전송 실패:", err);
+      goto("q-done"); // 데모 흐름 유지(추후 토스트 안내)
+    }
+  }
 
   return (
     <div
@@ -102,9 +128,7 @@ export function PreferenceFormScreen() {
       {/* 시안: 미완료 = 이전 | 저장(비활성), 4개 다 채우면(30) 단일 "투표하기"로 전환. */}
       <div style={{ marginTop: "auto" }}>
         {isComplete ? (
-          <BottomCTA.Single onClick={() => goto("q-done")}>
-            투표하기
-          </BottomCTA.Single>
+          <BottomCTA.Single onClick={handleSubmit}>투표하기</BottomCTA.Single>
         ) : (
           <BottomCTA.Double
             leftButton={

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, BottomSheet, List, ListRow, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import { REGIONS } from "../data/stations";
+import { useStations } from "../api";
 import { getPortalRoot } from "../lib/portal";
 import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
 
@@ -11,18 +11,22 @@ interface Props {
 }
 
 // F-02 위치 선택 - 2단: 역 선택 바텀시트.
-// store의 meeting.regionId에 해당하는 권역의 역 목록을 보여준다.
-// regionId가 없으면 안내 메시지 — 정상 흐름에선 StationRegionSelectSheet에서 먼저 권역 선택.
+// GET /stations(useStations)에서 meeting.regionId 권역의 역 목록을 보여준다.
+// 선택 시 역명 + 좌표(lat/lng)를 store에 저장 → 모임 생성(POST /sessions)에 전달.
 export function StationSelectSheet({ onClose }: Props) {
   const { patchMeeting, meeting } = useApp();
-  const region = REGIONS.find((r) => r.id === meeting.regionId);
-  const [selected, setSelected] = useState<string | null>(
-    meeting.station ?? null,
-  );
+  const { data } = useStations();
+  const region = data?.regions.find((r) => r.id === meeting.regionId);
+  const [selected, setSelected] = useState<string | null>(meeting.station ?? null);
 
   function handleNext() {
-    if (selected == null) return;
-    patchMeeting({ station: selected });
+    if (selected == null || region == null) return;
+    const station = region.stations.find((s) => s.id === selected);
+    patchMeeting({
+      station: selected,
+      stationLat: station?.lat,
+      stationLng: station?.lng,
+    });
     onClose();
   }
 
@@ -48,14 +52,12 @@ export function StationSelectSheet({ onClose }: Props) {
         </div>
       ) : (
         <List>
-          {region.stations.map((stationName) => (
+          {region.stations.map((station) => (
             <ListRow
-              key={stationName}
-              contents={
-                <ListRow.Texts type="1RowTypeA" top={stationName} />
-              }
+              key={station.id}
+              contents={<ListRow.Texts type="1RowTypeA" top={station.id} />}
               right={
-                selected === stationName ? (
+                selected === station.id ? (
                   <Asset.Icon
                     name="icon-check-mono"
                     color={colors.blue500}
@@ -64,7 +66,7 @@ export function StationSelectSheet({ onClose }: Props) {
                   />
                 ) : undefined
               }
-              onClick={() => setSelected(stationName)}
+              onClick={() => setSelected(station.id)}
             />
           ))}
         </List>
