@@ -12,6 +12,7 @@ import {
   useStage2Vote,
 } from "./api";
 import { openExternal, shareText } from "./lib/appActions";
+import { ToastHost } from "./lib/toast";
 import { NavBar } from "./components/NavBar";
 import { IntroScreen } from "./screens/IntroScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
@@ -192,6 +193,7 @@ function App() {
     <AppProvider>
       <NavBar />
       <ScreenRouter />
+      <ToastHost />
     </AppProvider>
   );
 }

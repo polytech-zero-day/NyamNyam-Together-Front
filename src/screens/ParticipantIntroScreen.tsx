@@ -26,8 +26,8 @@ export function ParticipantIntroScreen() {
       }
       goto("q-hub");
     } catch (err) {
+      // 실패 시 전역 토스트가 안내. 입장 실패면 진행하지 않고 머문다(재시도 가능).
       console.error("참여 처리 실패:", err);
-      goto("q-hub"); // 데모 흐름 유지(추후 토스트 안내)
     } finally {
       setBusy(false);
     }

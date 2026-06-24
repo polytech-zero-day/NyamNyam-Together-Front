@@ -61,8 +61,8 @@ export function PreferenceFormScreen() {
       });
       goto("q-done");
     } catch (err) {
+      // 실패 시 전역 토스트가 안내. 화면은 q-hub에 머물러 재시도 가능하게 한다.
       console.error("응답 전송 실패:", err);
-      goto("q-done"); // 데모 흐름 유지(추후 토스트 안내)
     }
   }
 

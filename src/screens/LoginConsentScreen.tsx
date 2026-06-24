@@ -10,6 +10,7 @@ import {
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { loginAsHost } from "../api";
+import { showToast } from "../lib/toast";
 import { getPortalRoot } from "../lib/portal";
 import { APP_LOGO_SRC } from "../components/icons";
 
@@ -63,9 +64,9 @@ export function LoginConsentScreen() {
       setRole("host");
       goto("create-meeting");
     } catch (err) {
+      // appLogin·dev-login 모두 실패 — 안내 후 화면에 머문다.
       console.error("토스 로그인 실패:", err);
-      setRole("host");
-      goto("create-meeting");
+      showToast("로그인에 실패했어요. 잠시 후 다시 시도해주세요.", "error");
     } finally {
       setLoading(false);
     }
