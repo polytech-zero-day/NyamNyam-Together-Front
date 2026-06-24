@@ -1,6 +1,6 @@
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomCTA, TextField } from "@toss/tds-mobile";
-import checkFillIcon from "../assets/check-fill-circle.png";
+import { Asset, BottomCTA, TableRow, Text } from "@toss/tds-mobile";
+import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-11 조건 완화 안내 화면.
 // 후보가 0개일 때만 뜨는 예외 흐름(항상 X) — 백엔드가 0개 판정 후 완화 항목 들고 라우팅함.
@@ -54,32 +54,23 @@ export function RelaxedScreen({
           alt=""
           backgroundColor="transparent"
         />
-        <p
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: colors.grey800,
-            margin: "24px 0 8px",
-            textAlign: "center",
-            lineHeight: 1.35,
-          }}
+        <Text
+          typography="t3"
+          fontWeight="bold"
+          color={colors.grey800}
+          style={{ margin: "24px 0 8px", textAlign: "center" }}
         >
           {`딱 맞는 곳이 없어\n조건을 살짝 풀었어요`}
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            color: colors.grey500,
-            margin: 0,
-            textAlign: "center",
-            lineHeight: 1.35,
-            whiteSpace: "pre-line",
-          }}
+        </Text>
+        <Text
+          typography="t5"
+          color={colors.grey500}
+          style={{ textAlign: "center", whiteSpace: "pre-line" }}
         >
           {`입력하신 조건보다\n범위를 더 넓혀서 추천해드릴게요`}
-        </p>
+        </Text>
 
-        {/* 완화 항목 before → after. 백엔드가 보낸 필드만 보여준다(여러 개일 수도). */}
+        {/* 완화 항목: 항목명(좌) → before→after(우). 백엔드가 보낸 필드만 노출(여러 개 가능). */}
         <div
           style={{
             width: "100%",
@@ -90,30 +81,39 @@ export function RelaxedScreen({
           }}
         >
           {relaxedFields.map((f) => (
-            <TextField
+            <div
               key={f.label}
-              variant="box"
-              label={f.label}
-              labelOption="sustain"
-              value={`${f.before}  →  ${f.after}`}
-              onChange={() => {
-                // 읽기 전용 표시 — 사용자가 직접 수정하지 않음
+              style={{
+                background: colors.grey50,
+                borderRadius: 12,
+                padding: "4px 16px",
               }}
-            />
+            >
+              <TableRow
+                align="space-between"
+                left={
+                  <Text typography="t6" fontWeight="medium" color={colors.grey700}>
+                    {f.label}
+                  </Text>
+                }
+                right={
+                  <Text typography="t6" fontWeight="medium" color={colors.grey800}>
+                    {`${f.before}  →  ${f.after}`}
+                  </Text>
+                }
+              />
+            </div>
           ))}
         </div>
 
         {/* CLAUDE.md F-11 ③ 술자리 조건은 끝까지 유지된다는 보장 안내. */}
-        <p
-          style={{
-            fontSize: 13,
-            color: colors.grey400,
-            margin: "16px 0 0",
-            textAlign: "center",
-          }}
+        <Text
+          typography="t7"
+          color={colors.grey400}
+          style={{ margin: "16px 0 0", textAlign: "center" }}
         >
           술자리 조건은 그대로 지켰어요
-        </p>
+        </Text>
       </div>
 
       <BottomCTA.Single

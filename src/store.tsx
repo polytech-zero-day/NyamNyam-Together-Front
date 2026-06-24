@@ -8,6 +8,7 @@ import {
 } from "react";
 import type {
   Alcohol,
+  BudgetTierLabel,
   FoodCategory,
   Mood,
   Purpose,
@@ -26,7 +27,10 @@ interface MeetingForm {
 
 interface ParticipantForm {
   alcohol?: Alcohol;
-  // 예산은 선택 전엔 미설정(undefined). 선택 시 BUDGET_TIERS의 min~max(원)가 채워진다.
+  // 예산은 단일선택(시안 24). 선택 시 BUDGET_TIERS 한 구간의 라벨 + min~max(원)가 채워진다.
+  //   · budgetLabel: 허브 요약/체크 표시용 (예: "1만원 이하")
+  //   · budgetMin/Max: 추천엔진 3.3(priceLevel 밴드)에 그대로 전달
+  budgetLabel?: BudgetTierLabel;
   budgetMin?: number;
   budgetMax?: number;
   foods: FoodCategory[];

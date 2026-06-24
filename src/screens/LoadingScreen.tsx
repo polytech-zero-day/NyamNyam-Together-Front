@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { colors } from "@toss/tds-colors";
-import { Asset } from "@toss/tds-mobile";
-import loaderPrimary from "../assets/loader-primary.png";
+import { Asset, Text } from "@toss/tds-mobile";
+import loaderPrimary from "../assets/loader-primary.svg";
 
 // F-10 추천 로딩 화면. 추천 엔진(필터→정렬→압축)이 끝나면 정렬 기준 선택(F-16)으로 보낸다.
 // 데모는 setTimeout 으로 자동 진행. 탭(onClick) 으로도 즉시 넘어갈 수 있음.
@@ -46,27 +46,21 @@ export function LoadingScreen({ onComplete }: Props) {
         alt=""
         backgroundColor="transparent"
       />
-      <p
-        style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: colors.grey800,
-          margin: 0,
-          textAlign: "center",
-        }}
+      <Text
+        typography="t3"
+        fontWeight="bold"
+        color={colors.grey800}
+        style={{ textAlign: "center" }}
       >
         식당을 찾았어요
-      </p>
-      <p
-        style={{
-          fontSize: 16,
-          color: colors.grey500,
-          margin: -16,
-          textAlign: "center",
-        }}
+      </Text>
+      <Text
+        typography="t5"
+        color={colors.grey500}
+        style={{ textAlign: "center" }}
       >
         잠시만 기다려주세요
-      </p>
+      </Text>
     </div>
   );
 }

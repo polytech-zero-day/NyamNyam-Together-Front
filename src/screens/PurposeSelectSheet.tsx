@@ -21,8 +21,10 @@ interface Props {
 
 export function PurposeSelectSheet({ onClose }: Props) {
   const { patchMeeting, meeting } = useApp();
+  // 시안(06)처럼 유일한 활성 옵션인 "친구들과의 모임"을 기본 선택해 둔다.
+  // (MVP는 친구 모임 목적만 활성 — CLAUDE.md)
   const [selected, setSelected] = useState<Purpose | null>(
-    meeting.purpose ?? null,
+    meeting.purpose ?? "친구들과의 모임",
   );
 
   function handleNext() {

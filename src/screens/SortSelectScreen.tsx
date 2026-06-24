@@ -57,6 +57,7 @@ export function SortSelectScreen({ onConfirm }: Props) {
                 // 시안 옵션 카드: 선택 시 짙은 회색, 미선택은 연한 회색.
                 background: isSelected ? colors.grey200 : colors.grey50,
                 border: "none",
+                outline: "none",
                 borderRadius: 12,
                 padding: "12px 20px",
                 cursor: "pointer",
@@ -75,6 +76,7 @@ export function SortSelectScreen({ onConfirm }: Props) {
                     {subText}
                   </ListHeader.DescriptionParagraph>
                 }
+                descriptionPosition="bottom"
               />
             </button>
           );

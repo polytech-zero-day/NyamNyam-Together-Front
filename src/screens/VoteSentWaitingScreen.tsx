@@ -1,6 +1,6 @@
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomCTA } from "@toss/tds-mobile";
-import checkFillIcon from "../assets/check-fill-circle.png";
+import { Asset, BottomCTA, Text } from "@toss/tds-mobile";
+import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-14 응답 진행률 화면 — 참여자 본인의 취향은 보냈고, 다른 참여자들의 응답을 기다리는 대기 상태.
 // "확인했어요"는 앱을 닫지 않고 대기를 유지하는 의도(B안). 백엔드 연동 시:
@@ -45,27 +45,21 @@ export function VoteSentWaitingScreen({
           alt=""
           backgroundColor="transparent"
         />
-        <p
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: colors.grey800,
-            margin: "24px 0 8px",
-            textAlign: "center",
-          }}
+        <Text
+          typography="t3"
+          fontWeight="bold"
+          color={colors.grey800}
+          style={{ margin: "24px 0 8px", textAlign: "center" }}
         >
           취향을 보냈어요
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            color: colors.grey500,
-            margin: 0,
-            textAlign: "center",
-          }}
+        </Text>
+        <Text
+          typography="t5"
+          color={colors.grey500}
+          style={{ textAlign: "center" }}
         >
           {`투표를 완료한 인원 수 ( ${votedCount} / ${totalCount} )`}
-        </p>
+        </Text>
       </div>
 
       <BottomCTA.Single

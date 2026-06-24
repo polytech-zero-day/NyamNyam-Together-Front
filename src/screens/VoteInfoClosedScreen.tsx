@@ -1,13 +1,6 @@
-import {
-  Asset,
-  Badge,
-  BottomCTA,
-  Border,
-  Button,
-  ListHeader,
-} from "@toss/tds-mobile";
+import { Asset, Badge, BottomCTA, Border, ListHeader } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import womanIcon from "../assets/woman-fill-circle.png";
+import womanIcon from "../assets/woman-fill-circle.svg";
 
 // F-13 투표 정보(종료). VoteInfoActiveScreen과 같은 구조에 종료 상태값을 채운 화면.
 // 배지=투표종료(회색), 투표 인원=3/3, 남은 시간=00:00:00, 식당 정보 채워짐, 하단은 닫기 1개.

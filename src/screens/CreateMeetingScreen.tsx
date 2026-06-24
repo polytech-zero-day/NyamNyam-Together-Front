@@ -3,7 +3,7 @@ import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomCTA,
-  Button,
+  CTAButton,
   List,
   ListRow,
   ProgressBar,
@@ -100,27 +100,18 @@ export function CreateMeetingScreen() {
       <div style={{ marginTop: "auto" }}>
         <BottomCTA.Double
           leftButton={
-            <Button
-              color="dark"
-              variant="weak"
-              size="xlarge"
-              display="block"
-              onClick={back}
-            >
+            <CTAButton color="dark" variant="weak" onClick={back}>
               이전
-            </Button>
+            </CTAButton>
           }
           rightButton={
-            <Button
+            <CTAButton
               color="primary"
-              variant="fill"
-              size="xlarge"
-              display="block"
               disabled={!isComplete}
               onClick={() => goto("invite-generated")}
             >
               저장
-            </Button>
+            </CTAButton>
           }
         />
       </div>

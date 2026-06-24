@@ -2,12 +2,13 @@ import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomCTA,
-  Button,
+  CTAButton,
   IconButton,
+  Text,
   TextField,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import checkFillIcon from "../assets/check-fill-circle.png";
+import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-03 모임 생성 완료. 호스트가 만든 모임의 초대 링크를 보여주고 공유하도록 유도.
 // 실제 링크 생성은 백엔드 연동 시 — 지금은 자리만 잡고 더미 링크로.
@@ -52,27 +53,21 @@ export function InviteGeneratedScreen() {
           alt=""
           backgroundColor="transparent"
         />
-        <p
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: colors.grey800,
-            margin: "24px 0 8px",
-          }}
+        <Text
+          typography="t3"
+          fontWeight="bold"
+          color={colors.grey800}
+          style={{ margin: "24px 0 8px" }}
         >
           모임을 만들었어요
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            color: colors.grey500,
-            margin: 0,
-            textAlign: "center",
-            padding: "0 24px",
-          }}
+        </Text>
+        <Text
+          typography="t5"
+          color={colors.grey500}
+          style={{ textAlign: "center", padding: "0 24px" }}
         >
           초대 링크를 친구들에게 공유해보세요
-        </p>
+        </Text>
 
         <div style={{ width: "100%", marginTop: 40 }}>
           <TextField
@@ -98,26 +93,14 @@ export function InviteGeneratedScreen() {
 
       <BottomCTA.Double
         leftButton={
-          <Button
-            color="dark"
-            variant="weak"
-            size="xlarge"
-            display="block"
-            onClick={back}
-          >
+          <CTAButton color="dark" variant="weak" onClick={back}>
             닫기
-          </Button>
+          </CTAButton>
         }
         rightButton={
-          <Button
-            color="primary"
-            variant="fill"
-            size="xlarge"
-            display="block"
-            onClick={() => goto("wait-others")}
-          >
+          <CTAButton color="primary" onClick={() => goto("wait-others")}>
             투표 현황보기
-          </Button>
+          </CTAButton>
         }
       />
     </div>

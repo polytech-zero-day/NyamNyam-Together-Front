@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
 import { SheetDoubleCTA } from "../components/SheetDoubleCTA";
@@ -66,16 +66,14 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
       cta={<SheetDoubleCTA onClose={onClose} onNext={handleNext} />}
     >
       <div style={{ padding: "8px 24px 16px" }}>
-        <p
-          style={{
-            fontSize: 17,
-            fontWeight: 600,
-            color: colors.grey800,
-            margin: "0 0 8px",
-          }}
+        <Text
+          typography="t5"
+          fontWeight="semibold"
+          color={colors.grey800}
+          style={{ margin: "0 0 8px" }}
         >
           {formatKorean(date)}
-        </p>
+        </Text>
         <input
           type="date"
           value={date}

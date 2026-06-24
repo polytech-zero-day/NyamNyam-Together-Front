@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomSheet, List, ListRow } from "@toss/tds-mobile";
+import { Asset, BottomSheet, List, ListRow, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { REGIONS } from "../data/stations";
 import { getPortalRoot } from "../lib/portal";
@@ -41,15 +41,10 @@ export function StationSelectSheet({ onClose }: Props) {
       }
     >
       {region == null ? (
-        <div
-          style={{
-            padding: "16px 24px 24px",
-            color: colors.grey600,
-            fontSize: 15,
-            lineHeight: 1.5,
-          }}
-        >
-          먼저 지역을 골라주세요.
+        <div style={{ padding: "16px 24px 24px" }}>
+          <Text typography="t6" color={colors.grey600}>
+            먼저 지역을 골라주세요.
+          </Text>
         </div>
       ) : (
         <List>

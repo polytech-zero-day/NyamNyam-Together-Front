@@ -1,7 +1,7 @@
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomCTA, Button } from "@toss/tds-mobile";
+import { Asset, BottomCTA, CTAButton, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import checkFillIcon from "../assets/check-fill-circle.png";
+import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-13/F-14 투표 대기 화면. 호스트가 "투표 현황보기"로 진입했을 때 보는 진행 상황.
 // 좌측 "투표 강제종료" → host가 마감 시간 전에 강제 종료(F-09). 우측 "자세히보기" → 14번 상세.
@@ -39,36 +39,28 @@ export function VoteWaitingScreen() {
           alt=""
           backgroundColor="transparent"
         />
-        <p
-          style={{
-            fontSize: 24,
-            fontWeight: 700,
-            color: colors.grey800,
-            margin: "24px 0 8px",
-            textAlign: "center",
-          }}
+        <Text
+          typography="t3"
+          fontWeight="bold"
+          color={colors.grey800}
+          style={{ margin: "24px 0 8px", textAlign: "center" }}
         >
           아직 투표가 완료되지 않았어요
-        </p>
-        <p
-          style={{
-            fontSize: 16,
-            color: colors.grey500,
-            margin: 0,
-            textAlign: "center",
-          }}
+        </Text>
+        <Text
+          typography="t5"
+          color={colors.grey500}
+          style={{ textAlign: "center" }}
         >
           {`투표 진행 중 ( ${VOTED_COUNT} / ${TOTAL_COUNT} )`}
-        </p>
+        </Text>
       </div>
 
       <BottomCTA.Double
         leftButton={
-          <Button
+          <CTAButton
             color="dark"
             variant="weak"
-            size="xlarge"
-            display="block"
             onClick={() => {
               // TODO(backend): 호스트 강제 종료 API → 종료 시점 스냅샷.
               // 데모: 바로 종료 결과 화면으로 이동.
@@ -76,18 +68,12 @@ export function VoteWaitingScreen() {
             }}
           >
             투표 강제종료
-          </Button>
+          </CTAButton>
         }
         rightButton={
-          <Button
-            color="primary"
-            variant="fill"
-            size="xlarge"
-            display="block"
-            onClick={() => goto("vote")}
-          >
+          <CTAButton color="primary" onClick={() => goto("vote")}>
             자세히보기
-          </Button>
+          </CTAButton>
         }
       />
     </div>

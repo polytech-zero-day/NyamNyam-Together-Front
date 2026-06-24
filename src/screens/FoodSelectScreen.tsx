@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { colors } from "@toss/tds-colors";
-import { BottomCTA, Button, ProgressBar, Top } from "@toss/tds-mobile";
+import { BottomCTA, CTAButton, ProgressBar, Text, Top } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { FOOD_CATEGORIES, type FoodCategory } from "../types";
 
@@ -32,7 +32,7 @@ export function FoodSelectScreen() {
   // 진행률은 PreferenceFormScreen 과 동일 — 음식 화면도 폼의 일부.
   const filledCount = [
     participant.alcohol,
-    participant.budgetMin,
+    participant.budgetLabel,
     selected.size > 0 ? "x" : null,
     participant.mood,
   ].filter((v) => v != null).length;
@@ -111,6 +111,7 @@ export function FoodSelectScreen() {
                   ? colors.greyOpacity200
                   : colors.greyOpacity50,
                 border: "none",
+                outline: "none",
                 borderRadius: 9,
                 padding: "12px 8px",
                 height: 74,
@@ -126,15 +127,9 @@ export function FoodSelectScreen() {
               <span style={{ fontSize: 24, lineHeight: 1 }}>
                 {FOOD_EMOJI[cat]}
               </span>
-              <span
-                style={{
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: colors.grey800,
-                }}
-              >
+              <Text typography="t6" fontWeight="medium" color={colors.grey800}>
                 {cat}
-              </span>
+              </Text>
             </button>
           );
         })}
@@ -143,27 +138,18 @@ export function FoodSelectScreen() {
       <div style={{ marginTop: "auto" }}>
         <BottomCTA.Double
           leftButton={
-            <Button
-              color="dark"
-              variant="weak"
-              size="xlarge"
-              display="block"
-              onClick={back}
-            >
+            <CTAButton color="dark" variant="weak" onClick={back}>
               이전
-            </Button>
+            </CTAButton>
           }
           rightButton={
-            <Button
+            <CTAButton
               color="primary"
-              variant="fill"
-              size="xlarge"
-              display="block"
               disabled={selected.size === 0}
               onClick={handleSave}
             >
               저장
-            </Button>
+            </CTAButton>
           }
         />
       </div>

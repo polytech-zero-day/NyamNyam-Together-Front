@@ -9,7 +9,7 @@ import {
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { getPortalRoot } from "../lib/portal";
-import loginConsentIcon from "../assets/login-consent-icon.png";
+import loginConsentIcon from "../assets/login-consent-icon.svg";
 
 // F-04 호스트 토스 로그인 동의 화면.
 // 상단: 아이콘 + 타이틀("냠냠투게더에서 토스로 로그인할까요?").
@@ -22,13 +22,24 @@ export function LoginConsentScreen() {
   const { goto, back } = useApp();
 
   async function handleLogin() {
+    // 토스 웹뷰가 아닌 환경(PC 브라우저·dev·헤드리스)에서는 appLogin() 의 비동기
+    // 브리지 응답이 영영 오지 않아 promise 가 pending 으로 멈춘다(browser-shim 주석 참고).
+    // 이런 환경에선 네이티브 로그인을 건너뛰고 바로 다음 화면으로 진행한다.
+    // 실기기(ReactNativeWebView 존재)에서는 정상적으로 appLogin() 을 호출한다.
+    const isBrowserShim =
+      typeof window !== "undefined" && window.__NYAM_BROWSER_SHIM__ === true;
+    if (isBrowserShim) {
+      goto("create-meeting");
+      return;
+    }
+
     try {
       const { authorizationCode } = await appLogin();
       // TODO(backend): authorizationCode 를 서버에 보내 host userKey 발급 / 세션 생성
       console.log("[host login] authorizationCode:", authorizationCode);
       goto("create-meeting");
     } catch (err) {
-      // 사용자가 거부했거나 SDK 호출 실패(dev/브라우저 환경 포함).
+      // 사용자가 거부했거나 SDK 호출 실패.
       // 데모 흐름을 막지 않기 위해 다음 화면으로 그대로 진행.
       console.error("토스 로그인 실패:", err);
       goto("create-meeting");

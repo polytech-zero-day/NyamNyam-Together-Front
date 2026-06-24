@@ -3,7 +3,7 @@ import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomCTA,
-  Button,
+  CTAButton,
   List,
   ListRow,
   ProgressBar,
@@ -31,7 +31,7 @@ export function PreferenceFormScreen() {
 
   const filledCount = [
     participant.alcohol,
-    participant.budgetMin, // 예산은 min/max 두 필드지만 한 항목으로 카운트
+    participant.budgetLabel,
     participant.foods.length > 0 ? "x" : null,
     participant.mood,
   ].filter((v) => v != null).length;
@@ -77,10 +77,7 @@ export function PreferenceFormScreen() {
         <PreferenceFieldRow
           icon="💰"
           label="예산"
-          value={formatBudget(
-            participant.budgetMin,
-            participant.budgetMax,
-          )}
+          value={participant.budgetLabel ?? null}
           onClick={() => setOpenSheet("budget")}
         />
         <PreferenceFieldRow
@@ -102,32 +99,26 @@ export function PreferenceFormScreen() {
         />
       </List>
 
+      {/* 시안: 미완료 = 이전 | 저장(비활성), 4개 다 채우면(30) 단일 "투표하기"로 전환. */}
       <div style={{ marginTop: "auto" }}>
-        <BottomCTA.Double
-          leftButton={
-            <Button
-              color="dark"
-              variant="weak"
-              size="xlarge"
-              display="block"
-              onClick={back}
-            >
-              이전
-            </Button>
-          }
-          rightButton={
-            <Button
-              color="primary"
-              variant="fill"
-              size="xlarge"
-              display="block"
-              disabled={!isComplete}
-              onClick={() => goto("q-done")}
-            >
-              저장
-            </Button>
-          }
-        />
+        {isComplete ? (
+          <BottomCTA.Single onClick={() => goto("q-done")}>
+            투표하기
+          </BottomCTA.Single>
+        ) : (
+          <BottomCTA.Double
+            leftButton={
+              <CTAButton color="dark" variant="weak" onClick={back}>
+                이전
+              </CTAButton>
+            }
+            rightButton={
+              <CTAButton color="primary" disabled>
+                저장
+              </CTAButton>
+            }
+          />
+        )}
       </div>
 
       {/* 시트 overlay — 호스트 CreateMeetingScreen 과 동일한 패턴.
@@ -137,15 +128,6 @@ export function PreferenceFormScreen() {
       {openSheet === "mood" && <MoodSelectSheet onClose={closeSheet} />}
     </div>
   );
-}
-
-function formatBudget(
-  min: number | undefined,
-  max: number | undefined,
-): string | null {
-  if (min == null || max == null) return null;
-  // 단순 표시 — "10000원 ~ 25000원" 같은 식. 실제 백엔드 전달은 min/max 그대로.
-  return `${(min / 10000).toFixed(0)}만원 ~ ${(max / 10000).toFixed(0)}만원`;
 }
 
 function EmojiIcon({ children }: { children: string }) {

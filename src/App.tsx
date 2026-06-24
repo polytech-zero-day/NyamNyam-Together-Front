@@ -23,6 +23,12 @@ import { SecondVoteWaitingScreen } from "./screens/SecondVoteWaitingScreen";
 import { VoteCountingScreen } from "./screens/VoteCountingScreen";
 import { FinalResultScreen } from "./screens/FinalResultScreen";
 
+// 데모 플래그 — URL 에 ?relaxed 가 있으면 추천 로딩(33) 후 조건완화 공지(34)를 거치게 한다.
+// 실제로는 백엔드가 후보 0개를 판정해 분기하지만, 연동 전이라 분기를 눈으로 확인할 수단.
+const RELAX_DEMO =
+  typeof window !== "undefined" &&
+  new URLSearchParams(window.location.search).has("relaxed");
+
 // 화면 라우팅. 화면 자체는 dumb (props 로 핸들러 받음) — goto 결정은 여기 한곳에서.
 //
 // 호스트 흐름:
@@ -63,13 +69,17 @@ function ScreenRouter() {
       {screen === "all-done" && (
         <AllSettledScreen onComplete={() => goto("finding")} />
       )}
+      {/* F-10 추천 로딩(33). 후보가 충분하면 정렬 기준 선택(35)으로 직행,
+          후보 부족(조건완화)이면 공지 화면(34)을 거친다.
+          백엔드 연동 전이라 분기는 데모 플래그(?relaxed)로 흉내낸다 — RELAX_DEMO 참고. */}
       {screen === "finding" && (
-        <LoadingScreen onComplete={() => goto("sort-select")} />
+        <LoadingScreen
+          onComplete={() => goto(RELAX_DEMO ? "relaxed" : "sort-select")}
+        />
       )}
-      {/* F-11 분기 화면. 백엔드가 0개 판정 시만 진입(데모는 미연결).
-          진입 경로 확보 차원에서 라우팅만 두고, 자동 분기는 아직 없음. */}
+      {/* F-11 조건완화 공지(34). "추천 결과 보기" → 정렬 기준 선택(35). */}
       {screen === "relaxed" && (
-        <RelaxedScreen onConfirm={() => goto("vote-candidates")} />
+        <RelaxedScreen onConfirm={() => goto("sort-select")} />
       )}
       {screen === "sort-select" && (
         <SortSelectScreen

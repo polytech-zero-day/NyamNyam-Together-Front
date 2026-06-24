@@ -4,11 +4,11 @@ import {
   Badge,
   BottomCTA,
   Border,
-  Button,
+  CTAButton,
   ListHeader,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import womanIcon from "../assets/woman-fill-circle.png";
+import womanIcon from "../assets/woman-fill-circle.svg";
 
 
 
@@ -198,29 +198,21 @@ export function VoteInfoActiveScreen() {
 
       <BottomCTA.Double
         leftButton={
-          <Button
+          <CTAButton
             color="dark"
             variant="weak"
-            size="xlarge"
-            display="block"
             onClick={() => {
               // TODO(backend): 호스트 강제 종료 API. 데모: 바로 종료 화면으로.
               goto("vote-info-closed");
             }}
           >
             투표 강제종료
-          </Button>
+          </CTAButton>
         }
         rightButton={
-          <Button
-            color="primary"
-            variant="fill"
-            size="xlarge"
-            display="block"
-            onClick={back}
-          >
+          <CTAButton color="primary" onClick={back}>
             닫기
-          </Button>
+          </CTAButton>
         }
       />
     </div>

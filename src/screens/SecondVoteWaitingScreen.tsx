@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { colors } from "@toss/tds-colors";
-import { Asset } from "@toss/tds-mobile";
-import checkFillIcon from "../assets/check-fill-circle.png";
+import { Asset, Text } from "@toss/tds-mobile";
+import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-14 2차(후보) 투표 후 대기 화면.
 // 참여자가 후보 식당 중 하나를 골라 투표한 직후 — 다른 참여자들이 끝나길 기다리는 상태.
@@ -52,27 +52,21 @@ export function SecondVoteWaitingScreen({
         alt=""
         backgroundColor="transparent"
       />
-      <p
-        style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: colors.grey800,
-          margin: 0,
-          textAlign: "center",
-        }}
+      <Text
+        typography="t3"
+        fontWeight="bold"
+        color={colors.grey800}
+        style={{ textAlign: "center" }}
       >
         투표를 완료했어요
-      </p>
-      <p
-        style={{
-          fontSize: 16,
-          color: colors.grey500,
-          margin: 0,
-          textAlign: "center",
-        }}
+      </Text>
+      <Text
+        typography="t5"
+        color={colors.grey500}
+        style={{ textAlign: "center" }}
       >
         {`투표 진행 중 ( ${votedCount} / ${totalCount} )`}
-      </p>
+      </Text>
     </div>
   );
 }

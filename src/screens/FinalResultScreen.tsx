@@ -1,14 +1,13 @@
 import { colors } from "@toss/tds-colors";
-import { Asset, BottomCTA, Button, Top } from "@toss/tds-mobile";
+import { Asset, Button, IconButton, Text, Top } from "@toss/tds-mobile";
 import { DUMMY_VOTE_RESULTS, type VoteResult } from "../data/dummy-vote-results";
+import { BRAND_ORANGE } from "../components/icons";
 
-// F-13(투표 결과). 최다 득표 식당 1위 부상, 2·3위는 보조 표시.
+// F-13(투표 결과, 시안 41). 최다 득표 식당 1위 부상, 2·3위는 보조 표시.
 // CLAUDE.md 4장: "최종 한 곳 선택은 사용자 몫(시스템은 최다 득표 하이라이트만, 확정하지 않음)".
-// 그래서 이 화면도 "선정해드렸어요" 가 아니라 "여기로 정해졌어요" — 자연 부상 결과 안내.
-// 더미 데이터는 src/data/dummy-vote-results.ts 에서. 백엔드 연동 시 그 export 만 교체하면 됨.
-const PRIMARY = "#FF5F00";
-const PRIMARY_LIGHT = "#FFCCA8";
-
+// 그래서 "선정해드렸어요"가 아니라 "여기로 정해졌어요" — 자연 부상 결과 안내.
+// 더미 데이터는 src/data/dummy-vote-results.ts. 백엔드 연동 시 그 export 만 교체하면 됨.
+// 2/3위 카드 외곽선은 브랜드 연한 톤(orange200)으로.
 interface Props {
   results?: VoteResult[];
   onShare?: () => void;
@@ -21,7 +20,9 @@ export function FinalResultScreen({
   onShowMap,
 }: Props) {
   const first = results.find((r) => r.rank === 1);
-  const others = results.filter((r) => r.rank !== 1).sort((a, b) => a.rank - b.rank);
+  const others = results
+    .filter((r) => r.rank !== 1)
+    .sort((a, b) => a.rank - b.rank);
 
   return (
     <div
@@ -30,7 +31,7 @@ export function FinalResultScreen({
         flexDirection: "column",
         flex: 1,
         minHeight: 0,
-        background: "#fff",
+        background: colors.white,
       }}
     >
       <div style={{ flex: 1, overflowY: "auto" }}>
@@ -59,16 +60,11 @@ export function FinalResultScreen({
 
         {others.length > 0 && (
           <>
-            <p
-              style={{
-                fontSize: 13,
-                color: colors.grey500,
-                margin: 0,
-                padding: "16px 24px 8px",
-              }}
-            >
-              다른 후보
-            </p>
+            <div style={{ padding: "16px 24px 8px" }}>
+              <Text typography="t7" color={colors.grey500}>
+                다른 후보
+              </Text>
+            </div>
             <div
               style={{
                 display: "flex",
@@ -85,48 +81,63 @@ export function FinalResultScreen({
         )}
       </div>
 
-      <BottomCTA.Double
-        leftButton={
-          <Button
-            color="dark"
-            variant="weak"
-            size="xlarge"
-            display="block"
+      {/* 시안: 좌측 지도 아이콘(좁게) + 우측 공유하기(넓게). 비대칭이라 BottomCTA.Double(50:50)로는
+          표현 불가 → TDS IconButton + Button 을 직접 배치(safe-area 패딩은 BottomCTA 규칙과 동일). */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding:
+            "12px 20px max(var(--toss-safe-area-bottom, 0px), env(safe-area-inset-bottom), 20px)",
+          background: colors.white,
+        }}
+      >
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            flexShrink: 0,
+            borderRadius: 14,
+            background: colors.grey100,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconButton
+            name="icon-pin-location-mono"
+            aria-label="지도 보기"
+            variant="clear"
+            iconSize={24}
+            color={colors.grey700}
+            bgColor="transparent"
             onClick={() => {
               if (first && onShowMap) onShowMap(first.restaurant.id);
-              else console.log("[final-result] 지도 보기");
+              else console.log("[final-result] 지도 보기 (미연결)");
             }}
-            aria-label="지도 보기"
-          >
-            <Asset.Icon
-              name="icon-pin-location-mono"
-              color={colors.grey700}
-              frameShape={{ width: 24, height: 24 }}
-              backgroundColor="transparent"
-            />
-          </Button>
-        }
-        rightButton={
+          />
+        </div>
+        <div style={{ flex: 1 }}>
           <Button
             color="primary"
             variant="fill"
             size="xlarge"
-            display="block"
+            display="full"
             onClick={() => {
               if (onShare) onShare();
-              else console.log("[final-result] 공유하기");
+              else console.log("[final-result] 공유하기 (미연결)");
             }}
           >
             공유하기
           </Button>
-        }
-      />
+        </div>
+      </div>
     </div>
   );
 }
 
 // 1위 카드: VoteScreen 의 RestaurantCard 와 비슷한 구조 + "N표" 우측 표시.
-// 외곽선은 1px (이번엔 단일이라 두꺼운 선택 표시는 불필요).
 function WinnerCard({ result }: { result: VoteResult }) {
   const { restaurant, voteCount } = result;
   return (
@@ -135,8 +146,8 @@ function WinnerCard({ result }: { result: VoteResult }) {
         width: 320,
         height: 200,
         borderRadius: 20,
-        border: `1px solid ${PRIMARY}`,
-        background: "#fff",
+        border: `1px solid ${BRAND_ORANGE}`,
+        background: colors.white,
         overflow: "hidden",
         position: "relative",
       }}
@@ -154,36 +165,36 @@ function WinnerCard({ result }: { result: VoteResult }) {
           bottom: 0,
           left: 0,
           right: 0,
-          background: "#fff",
+          background: colors.white,
           padding: "8px 20px",
           display: "flex",
           alignItems: "center",
           gap: 8,
         }}
       >
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Text
+            typography="t5"
+            fontWeight="semibold"
+            color={colors.grey800}
             style={{
-              fontSize: 17,
-              fontWeight: 600,
-              color: colors.grey800,
-              margin: 0,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}
           >
             {restaurant.name}
-          </p>
-          <p
-            style={{
-              fontSize: 13,
-              color: colors.grey500,
-              margin: 0,
-            }}
-          >
+          </Text>
+          <Text typography="t7" color={colors.grey500}>
             {restaurant.category}
-          </p>
+          </Text>
         </div>
         <div
           style={{
@@ -197,23 +208,17 @@ function WinnerCard({ result }: { result: VoteResult }) {
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <Asset.Icon
               name="icon-star-fill-mono"
-              color="#FFB200"
+              color={colors.yellow600}
               frameShape={{ width: 20, height: 20 }}
               backgroundColor="transparent"
             />
-            <span
-              style={{
-                fontSize: 15,
-                fontWeight: 600,
-                color: colors.grey800,
-              }}
-            >
-              {restaurant.rating.toFixed(1)}({restaurant.userRatingCount})
-            </span>
+            <Text typography="t6" fontWeight="semibold" color={colors.grey800}>
+              {`${restaurant.rating.toFixed(1)}(${restaurant.userRatingCount})`}
+            </Text>
           </div>
-          <span style={{ fontSize: 13, color: colors.grey500 }}>
-            {voteCount}표
-          </span>
+          <Text typography="t7" color={colors.grey500}>
+            {`${voteCount}표`}
+          </Text>
         </div>
       </div>
     </div>
@@ -232,10 +237,7 @@ function OtherCandidateRow({ result }: { result: VoteResult }) {
           top: -6,
           left: 12,
           zIndex: 1,
-          background: colors.grey500,
-          color: "#fff",
-          fontSize: 13,
-          fontWeight: 700,
+          background: colors.grey700,
           width: 20,
           height: 20,
           borderRadius: 10,
@@ -244,12 +246,14 @@ function OtherCandidateRow({ result }: { result: VoteResult }) {
           justifyContent: "center",
         }}
       >
-        {rank}
+        <Text typography="t7" fontWeight="bold" color={colors.white}>
+          {String(rank)}
+        </Text>
       </div>
       <div
         style={{
-          background: "#fff",
-          border: `1.5px solid ${PRIMARY_LIGHT}`,
+          background: colors.white,
+          border: `1.5px solid ${colors.orange200}`,
           borderRadius: 15,
           padding: "8px 10px",
           display: "flex",
@@ -265,29 +269,29 @@ function OtherCandidateRow({ result }: { result: VoteResult }) {
           alt={restaurant.name}
           backgroundColor="transparent"
         />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p
+        <div
+          style={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Text
+            typography="t5"
+            fontWeight="bold"
+            color={colors.grey800}
             style={{
-              fontSize: 17,
-              fontWeight: 700,
-              color: colors.grey800,
-              margin: 0,
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}
           >
             {restaurant.name}
-          </p>
-          <p
-            style={{
-              fontSize: 13,
-              color: colors.grey500,
-              margin: 0,
-            }}
-          >
+          </Text>
+          <Text typography="t7" color={colors.grey500}>
             {restaurant.category}
-          </p>
+          </Text>
         </div>
         <div
           style={{
@@ -298,12 +302,12 @@ function OtherCandidateRow({ result }: { result: VoteResult }) {
             flexShrink: 0,
           }}
         >
-          <span style={{ fontSize: 15, color: colors.grey500 }}>
-            {restaurant.rating.toFixed(1)}({restaurant.userRatingCount})
-          </span>
-          <span style={{ fontSize: 13, color: colors.grey500 }}>
-            {voteCount}표
-          </span>
+          <Text typography="t6" color={colors.grey500}>
+            {`${restaurant.rating.toFixed(1)}(${restaurant.userRatingCount})`}
+          </Text>
+          <Text typography="t7" color={colors.grey500}>
+            {`${voteCount}표`}
+          </Text>
         </div>
       </div>
     </div>

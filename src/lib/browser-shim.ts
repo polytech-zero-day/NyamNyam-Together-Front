@@ -36,13 +36,26 @@ interface BrowserShimGlobals {
     on: (event: string, cb: (data: unknown) => void) => () => void;
   };
   __CONSTANT_HANDLER_MAP?: ConstantHandlerMap;
+  // 이 mock 이 주입됐다는 표식. "여기는 실제 토스 웹뷰가 아니다" 를 코드가 판별할 때 쓴다.
+  // (shim 이 ReactNativeWebView 를 채우므로 그 존재만으론 실기기와 구분 불가.)
+  __NYAM_BROWSER_SHIM__?: boolean;
 }
 
 declare global {
-  interface Window extends BrowserShimGlobals {}
+  // Window 에 브리지 슬롯을 직접 병합한다. (빈 interface extends 는 lint 규칙에 걸림)
+  interface Window {
+    ReactNativeWebView?: BrowserShimGlobals["ReactNativeWebView"];
+    __GRANITE_NATIVE_EMITTER?: BrowserShimGlobals["__GRANITE_NATIVE_EMITTER"];
+    __CONSTANT_HANDLER_MAP?: BrowserShimGlobals["__CONSTANT_HANDLER_MAP"];
+    __NYAM_BROWSER_SHIM__?: BrowserShimGlobals["__NYAM_BROWSER_SHIM__"];
+  }
 }
 
 if (typeof window !== "undefined" && window.ReactNativeWebView == null) {
+  // 0) "지금은 실제 토스 웹뷰가 아니다" 표식. 비동기 브리지(appLogin 등)를
+  //    건너뛸지 판단할 때 사용한다.
+  window.__NYAM_BROWSER_SHIM__ = true;
+
   // 1) 송신 채널 — no-op. 토스 앱에선 native 가 채움.
   window.ReactNativeWebView = { postMessage: () => {} };
 
