@@ -1,18 +1,27 @@
 import { Asset, Badge, BottomCTA, Border, ListHeader } from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { isNotReady, useRecommendations } from "../api";
 import womanIcon from "../assets/woman-fill-circle.svg";
 
-// F-13 투표 정보(종료). VoteInfoActiveScreen과 같은 구조에 종료 상태값을 채운 화면.
-// 배지=투표종료(회색), 투표 인원=3/3, 남은 시간=00:00:00, 식당 정보 채워짐, 하단은 닫기 1개.
-// 백엔드 연동 전 — 호스트/식당 더미.
+// F-13 투표 정보(종료). 종료 상태값 표시. 식당 정보는 최다 득표 1위(추천 응답)로 채운다.
+// (호스트 이름은 백엔드에 없어 placeholder 유지)
 const HOST_NAME = "김토스";
-const RESTAURANT_NAME = "신복면관";
-const RESTAURANT_ADDRESS = "서울특별시 강남구 테헤란로4길 6 B126호";
 
 export function VoteInfoClosedScreen() {
-  const { meeting, back } = useApp();
+  const { meeting, back, sessionId } = useApp();
+  const recs = useRecommendations(sessionId, undefined, { enabled: sessionId != null });
 
   const totalMembers = meeting.minMembers ?? 3;
+
+  // 최다 득표 1위(leader 우선, 없으면 voteCount 최댓값)를 식당 정보로.
+  const data = recs.data && !isNotReady(recs.data) ? recs.data : null;
+  const winner = data
+    ? (data.leader
+        ? data.recommendations.find((r) => r.recId === data.leader!.recId)
+        : [...data.recommendations].sort((a, b) => b.voteCount - a.voteCount)[0]) ?? null
+    : null;
+  const restaurantName = winner?.name ?? "—";
+  const restaurantAddress = winner?.address ?? "—";
 
   return (
     <div
@@ -158,7 +167,7 @@ export function VoteInfoClosedScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {RESTAURANT_NAME}
+              {restaurantName}
             </ListHeader.RightText>
           }
         />
@@ -170,7 +179,7 @@ export function VoteInfoClosedScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {RESTAURANT_ADDRESS}
+              {restaurantAddress}
             </ListHeader.RightText>
           }
         />

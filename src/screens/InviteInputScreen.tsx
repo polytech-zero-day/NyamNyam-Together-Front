@@ -58,7 +58,11 @@ export function InviteInputScreen() {
       />
 
       <div style={{ marginTop: "auto" }}>
-        <BottomCTA.Single onClick={handleConfirm} fixedAboveKeyboard>
+        <BottomCTA.Single
+          onClick={handleConfirm}
+          disabled={!link.trim()}
+          fixedAboveKeyboard
+        >
           확인
         </BottomCTA.Single>
       </div>

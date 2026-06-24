@@ -104,18 +104,18 @@ export function LoginConsentScreen() {
         }
       >
         {/*
-          약관 항목은 코드에 박지 않는다.
-          이 행들은 실제 동의 항목이 "이 자리에 표시된다" 는 슬롯 placeholder 일 뿐 —
-          진짜 약관과 동의는 위 CTA 가 호출하는 appLogin() 이 AIT 콘솔 등록값으로 띄운다.
+          약관 항목은 코드에 박지 않는다(CLAUDE.md F-04). 실제 약관 동의 UI는 "동의하고 시작하기"가
+          호출하는 appLogin()이 AIT 콘솔 등록값으로 띄운다. 여기는 그 안내 한 줄만.
         */}
         <List>
           <ListRow
-            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
-            withArrow
-          />
-          <ListRow
-            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
-            withArrow
+            contents={
+              <ListRow.Texts
+                type="2RowTypeB"
+                top="필수 약관 동의"
+                bottom="‘동의하고 시작하기’를 누르면 토스 약관에 동의하고 로그인해요"
+              />
+            }
           />
         </List>
       </BottomSheet>
