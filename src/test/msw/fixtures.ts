@@ -1,0 +1,110 @@
+// 스토리/테스트 공용 목 데이터. 백엔드 server/index.ts 응답 형태와 일치.
+import type {
+  RecommendationsResponse,
+  SessionResponse,
+  StationsResponse,
+} from "../../api/dto";
+
+export const stationsFixture: StationsResponse = {
+  regions: [
+    {
+      id: "gangnam",
+      name: "강남·서초·송파",
+      stations: [
+        { id: "강남역", lat: 37.4979, lng: 127.0276 },
+        { id: "선릉역", lat: 37.5045, lng: 127.0489 },
+        { id: "잠실역", lat: 37.5133, lng: 127.1001 },
+      ],
+    },
+    {
+      id: "yongsan",
+      name: "용산·마포·서대문",
+      stations: [
+        { id: "홍대입구역", lat: 37.5572, lng: 126.9245 },
+        { id: "합정역", lat: 37.5495, lng: 126.9136 },
+      ],
+    },
+  ],
+};
+
+export const sessionFixture: SessionResponse = {
+  id: "sess_demo_1",
+  host_user_key: 1001,
+  station_id: "강남역",
+  title: "금요일 저녁 모임",
+  min_participants: 3,
+  purpose: "친구들과의 모임",
+  deadline: "2026-06-25T19:00:00.000Z",
+  status: "voting",
+  sort_mode: "review_count",
+  sort_seed: 1,
+  winner_recommendation_id: null,
+  created_at: "2026-06-24T10:00:00.000Z",
+  participantCount: 4,
+};
+
+export const recommendationsFixture: RecommendationsResponse = {
+  sortMode: "review_count",
+  relaxed: false,
+  attribution: "Powered by Google",
+  leader: { recId: "rec_2", voteCount: 2 },
+  recommendations: [
+    {
+      recId: "rec_1",
+      placeId: "ChIJ_demo_1",
+      rank: 1,
+      placeType: "general",
+      relaxed: false,
+      source: "google",
+      name: "데일리픽스",
+      category: "햄버거",
+      rating: 4.8,
+      reviewCount: 616,
+      priceLevel: 2,
+      distanceM: 180,
+      address: "서울 강남구 ...",
+      phone: null,
+      mapUrl: "https://maps.google.com/?cid=1",
+      voteCount: 1,
+      poweredByGoogle: true,
+    },
+    {
+      recId: "rec_2",
+      placeId: "ChIJ_demo_2",
+      rank: 2,
+      placeType: "compatible",
+      relaxed: false,
+      source: "google",
+      name: "강남고기집",
+      category: "고기·구이",
+      rating: 4.6,
+      reviewCount: 248,
+      priceLevel: 3,
+      distanceM: 320,
+      address: "서울 강남구 ...",
+      phone: null,
+      mapUrl: "https://maps.google.com/?cid=2",
+      voteCount: 2,
+      poweredByGoogle: true,
+    },
+    {
+      recId: "rec_3",
+      placeId: "ChIJ_demo_3",
+      rank: 3,
+      placeType: "general",
+      relaxed: false,
+      source: "google",
+      name: "신복면관",
+      category: "중식",
+      rating: 4.5,
+      reviewCount: 387,
+      priceLevel: 1,
+      distanceM: 450,
+      address: "서울 강남구 ...",
+      phone: null,
+      mapUrl: "https://maps.google.com/?cid=3",
+      voteCount: 0,
+      poweredByGoogle: true,
+    },
+  ],
+};
