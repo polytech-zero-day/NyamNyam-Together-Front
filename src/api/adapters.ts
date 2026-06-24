@@ -84,7 +84,8 @@ export function toRecommendationCard(dto: RecommendationItemDTO, index: number):
 
     rating: dto.rating ?? 0,
     userRatingCount: dto.reviewCount ?? 0,
-    imageUrl: PLACEHOLDERS[index % PLACEHOLDERS.length],
+    // 라이브 구글 사진 우선, 없으면 목업 placeholder 순환.
+    imageUrl: dto.imageUrl ?? PLACEHOLDERS[index % PLACEHOLDERS.length],
     recId: dto.recId,
     placeId: dto.placeId,
     rank: dto.rank,

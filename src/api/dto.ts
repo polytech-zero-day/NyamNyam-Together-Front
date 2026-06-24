@@ -95,6 +95,7 @@ export interface RecommendationItemDTO {
   source: BackendPlaceSource | null;
   name: string | null;
   category: string | null; // 라이브 구글 업종 한글 라벨(또는 등록 식당 category)
+  imageUrl: string | null; // 라이브 구글 사진 CDN URL(없으면 프론트가 placeholder)
   rating: number | null;
   reviewCount: number | null;
   priceLevel: number | null;
