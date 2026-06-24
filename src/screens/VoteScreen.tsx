@@ -195,7 +195,7 @@ function RestaurantCard({
           }}
         >
           <Asset.Icon
-            name="icon-star-fill-mono"
+            name="icon-star-mono"
             color={colors.yellow600}
             frameShape={{ width: 20, height: 20 }}
             backgroundColor="transparent"

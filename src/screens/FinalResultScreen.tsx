@@ -207,7 +207,7 @@ function WinnerCard({ result }: { result: VoteResult }) {
         >
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <Asset.Icon
-              name="icon-star-fill-mono"
+              name="icon-star-mono"
               color={colors.yellow600}
               frameShape={{ width: 20, height: 20 }}
               backgroundColor="transparent"
