@@ -13,6 +13,7 @@ import type {
   Purpose,
   RegionId,
   ScreenId,
+  SortOrder,
 } from "./types";
 
 interface MeetingForm {
@@ -42,6 +43,10 @@ interface AppState {
   patchParticipant: (patch: Partial<ParticipantForm>) => void;
   voted: string | null;
   setVoted: (id: string | null) => void;
+  // F-16 정렬 기준. SortSelectScreen 에서 정해 VoteScreen 이 읽음 (세션 공유 1회 선택).
+  // 기본값은 "reviews" — CLAUDE.md 3.6 "미선택 시 기본값=리뷰순".
+  sort: SortOrder;
+  setSort: (s: SortOrder) => void;
 }
 
 const AppCtx = createContext<AppState | null>(null);
@@ -66,6 +71,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     foods: [],
   });
   const [voted, setVoted] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortOrder>("reviews");
 
   const goto = useCallback(
     (s: ScreenId) => {
@@ -104,8 +110,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       patchParticipant,
       voted,
       setVoted,
+      sort,
+      setSort,
     }),
-    [screen, goto, back, meeting, participant, patchMeeting, patchParticipant, voted],
+    [
+      screen,
+      goto,
+      back,
+      meeting,
+      participant,
+      patchMeeting,
+      patchParticipant,
+      voted,
+      sort,
+    ],
   );
 
   return <AppCtx.Provider value={value}>{children}</AppCtx.Provider>;

@@ -2,7 +2,6 @@ export type ScreenId =
   | "intro"
   | "welcome"
   | "login-consent"
-  | "onboarding"
   | "participant-onboarding"
   | "create-meeting"
   | "invite-generated"
@@ -14,8 +13,12 @@ export type ScreenId =
   | "all-done"
   | "finding"
   | "relaxed"
-  | "progress"
+  | "sort-select"
   | "vote"
+  | "vote-candidates"
+  | "second-vote-waiting"
+  | "vote-counting"
+  | "final-result"
   | "vote-info-closed";
 
 export type Purpose =
@@ -70,13 +73,39 @@ export type Mood = (typeof MOOD_OPTIONS)[number];
 // 기존 import 경로(`./types`)는 유지하기 위해 type만 re-export.
 export type { RegionId } from "./data/stations";
 
+// F-12 후보 카드. CLAUDE.md 3.5 / 6장 기준:
+//   영구 저장 가능한 건 place_id 뿐, 나머지(name·rating 등)는 라이브 조회 후 세션 내 폐기.
+//   reason(AI 추천 이유)는 F-15 폐기로 제거.
 export interface Restaurant {
-  id: string;
+  id: string; // 구글 place_id (영구 저장 가능한 유일 키)
   name: string;
   category: string;
-  distanceM: number;
-  rating: number | null;
-  reason: string;
-  bg: string;
-  emoji: string;
+  rating: number;
+  userRatingCount: number;
+  imageUrl: string;
 }
+
+// F-16 정렬 기준 선택.
+export type SortOrder = "reviews" | "rating" | "random";
+
+export const SORT_OPTIONS: {
+  id: SortOrder;
+  label: string;
+  subText: string;
+}[] = [
+  {
+    id: "reviews",
+    label: "리뷰 많은 순",
+    subText: "많은 사람이 다녀간 곳으로",
+  },
+  {
+    id: "rating",
+    label: "평점 높은 순",
+    subText: "만족도가 높은 순으로",
+  },
+  {
+    id: "random",
+    label: "랜덤 추천",
+    subText: "새로운 곳도 가볼래요",
+  },
+];
