@@ -1,146 +1,117 @@
-import { useState } from "react";
-import { AgreementV4, BottomSheet, Button } from "@toss/tds-mobile";
+import { appLogin } from "@apps-in-toss/web-framework";
+import {
+  Asset,
+  BottomSheet,
+  CTAButton,
+  List,
+  ListRow,
+  TextButton,
+  Top,
+} from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { getPortalRoot } from "../lib/portal";
+import loginConsentIcon from "../assets/login-consent-icon.png";
 
+// F-04 호스트 토스 로그인 동의 화면.
+// 상단: 아이콘 + 타이틀("냠냠투게더에서 토스로 로그인할까요?").
+// 항상 열린 BottomSheet 로 시안의 약관 동의 시트 시각 구조를 재현.
+// 약관 항목 텍스트는 코드에 박지 않는다(CLAUDE.md F-04 규칙).
+// 실제 약관 동의 UI 는 "동의하고 시작하기" → appLogin() 이 호출되면
+// AIT 콘솔에 등록된 약관으로 토스 앱이 자동으로 띄운다. 여기 placeholder 행은
+// 그 자리(슬롯)만 시각화해두는 용도.
 export function LoginConsentScreen() {
-  const { goto } = useApp();
-  const [open, setOpen] = useState(true);
-  const [agree1, setAgree1] = useState(false);
-  const [agree2, setAgree2] = useState(false);
-  const [agree3, setAgree3] = useState(false);
-  const [agree4, setAgree4] = useState(false);
+  const { goto, back } = useApp();
 
-  const allRequired = agree1 && agree2 && agree3;
-
-  const handleStart = () => {
-    if (!allRequired) return;
-    setOpen(false);
-    setTimeout(() => goto("onboarding"), 200);
-  };
+  async function handleLogin() {
+    try {
+      const { authorizationCode } = await appLogin();
+      // TODO(backend): authorizationCode 를 서버에 보내 host userKey 발급 / 세션 생성
+      console.log("[host login] authorizationCode:", authorizationCode);
+      goto("create-meeting");
+    } catch (err) {
+      // 사용자가 거부했거나 SDK 호출 실패(dev/브라우저 환경 포함).
+      // 데모 흐름을 막지 않기 위해 다음 화면으로 그대로 진행.
+      console.error("토스 로그인 실패:", err);
+      goto("create-meeting");
+    }
+  }
 
   return (
-    <div style={{ minHeight: "calc(100vh - var(--navbar-height))", padding: "20px 24px" }}>
+    <>
+      {/* 시트 뒤 배경 콘텐츠 */}
       <div
         style={{
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "#F2F4F6",
-          marginBottom: 24,
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          flexDirection: "column",
+          flex: 1,
+          minHeight: 0,
+          background: "#fff",
         }}
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path
-            d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5L19 18H5l3.5-4.5z"
-            fill="#B0B8C1"
+        <div style={{ padding: "24px 28px 0" }}>
+          <Asset.Image
+            src={loginConsentIcon}
+            frameShape={{ width: 60, height: 60 }}
+            scaleType="fit"
+            alt=""
+            backgroundColor="transparent"
           />
-        </svg>
-      </div>
-      <h1
-        style={{
-          fontSize: 24,
-          fontWeight: 800,
-          lineHeight: 1.35,
-          color: "#191F28",
-          letterSpacing: "-0.02em",
-        }}
-      >
-        냠냠투게더에서 토스로
-        <br />
-        로그인할까요?
-      </h1>
+        </div>
 
+        <Top
+          title={
+            <Top.TitleParagraph size={28}>
+              {`냠냠투게더에서 토스로\n로그인할까요?`}
+            </Top.TitleParagraph>
+          }
+        />
+      </div>
+
+      {/* 시안 그대로의 약관 동의 시트 — 항상 열림. */}
       <BottomSheet
-        open={open}
-        onClose={() => setOpen(false)}
+        open
+        onClose={back}
+        portalContainer={getPortalRoot()}
         header={
           <BottomSheet.Header>
-            냠냠투게더 로그인을 위해
-            <br />꼭 필요한 동의만 추렸어요
+            {`냠냠투게더 로그인을 위해\n꼭 필요한 동의만 추렸어요`}
           </BottomSheet.Header>
         }
         cta={
-          <BottomSheet.CTA
-            onClick={handleStart}
-            disabled={!allRequired}
-          >
-            동의하고 시작하기
-          </BottomSheet.CTA>
-        }
-      >
-        <div style={{ padding: "8px 4px 16px" }}>
-          <AgreementV4.Header variant="small">냠냠서비스 동의항목</AgreementV4.Header>
-          <AgreementV4
-            variant="medium"
-            left={
-              <AgreementV4.Checkbox
-                checked={agree1}
-                onCheckedChange={setAgree1}
-              />
-            }
-            middle={<AgreementV4.Text>콘솔에서 약관 정의 후 수정 예정</AgreementV4.Text>}
-            right={<AgreementV4.RightArrow />}
-          />
-          <AgreementV4
-            variant="medium"
-            left={
-              <AgreementV4.Checkbox
-                checked={agree2}
-                onCheckedChange={setAgree2}
-              />
-            }
-            middle={<AgreementV4.Text>콘솔에서 약관 정의 후 수정 예정</AgreementV4.Text>}
-            right={<AgreementV4.RightArrow />}
-          />
-
-          <div style={{ height: 16 }} />
-
-          <AgreementV4.Header variant="small">토스 동의항목</AgreementV4.Header>
-          <AgreementV4
-            variant="medium"
-            left={
-              <AgreementV4.Checkbox
-                checked={agree3}
-                onCheckedChange={setAgree3}
-              />
-            }
-            middle={<AgreementV4.Text>[필수] 개인정보 제3자 정보 제공</AgreementV4.Text>}
-            right={<AgreementV4.RightArrow />}
-          />
-          <AgreementV4
-            variant="medium"
-            left={
-              <AgreementV4.Checkbox
-                checked={agree4}
-                onCheckedChange={setAgree4}
-              />
-            }
-            middle={<AgreementV4.Text>[선택] 선택 제공 항목</AgreementV4.Text>}
-            right={<AgreementV4.RightArrow />}
-          />
-
-          <div style={{ textAlign: "center", marginTop: 8 }}>
-            <Button
-              variant="weak"
-              color="dark"
-              size="small"
-              onClick={() => {
-                setOpen(false);
-                setTimeout(() => goto("onboarding"), 200);
-              }}
+          <>
+            <BottomSheet.CTA onClick={handleLogin}>
+              동의하고 시작하기
+            </BottomSheet.CTA>
+            <div
               style={{
-                background: "transparent",
-                textDecoration: "underline",
+                display: "flex",
+                justifyContent: "center",
+                padding: "8px 0 0",
               }}
             >
-              다음에
-            </Button>
-          </div>
-        </div>
+              <TextButton size="xsmall" variant="underline" onClick={back}>
+                다음에
+              </TextButton>
+            </div>
+          </>
+        }
+      >
+        {/*
+          약관 항목은 코드에 박지 않는다.
+          이 행들은 실제 동의 항목이 "이 자리에 표시된다" 는 슬롯 placeholder 일 뿐 —
+          진짜 약관과 동의는 위 CTA 가 호출하는 appLogin() 이 AIT 콘솔 등록값으로 띄운다.
+        */}
+        <List>
+          <ListRow
+            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
+            withArrow
+          />
+          <ListRow
+            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
+            withArrow
+          />
+        </List>
       </BottomSheet>
-    </div>
+    </>
   );
 }

@@ -5,6 +5,10 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  /* position:fixed 자식들(BottomSheet 등)이 viewport 가 아니라 #root 기준으로
+     자리잡도록 containing block 을 만든다.
+     getPortalRoot() 로 시트를 #root 안으로 portal 시키는 것과 한 세트로 동작. */
+  transform: translateZ(0);
 }
 
 @media (min-width: 481px) {

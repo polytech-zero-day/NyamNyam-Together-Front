@@ -20,7 +20,11 @@
       "Bash(pkill -f \"remote-debugging-port=9224\")",
       "Bash(pkill -f \"vite preview --port 4320\")",
       "Bash(pkill -f \"remote-debugging-port=9225\")",
-      "Bash(grep -rhoiE \"font-family:[^;}\\\\\"']{0,60}\" node_modules/@toss/tds-mobile/dist node_modules/@toss/tds-mobile-ait/dist)"
+      "Bash(grep -rhoiE \"font-family:[^;}\\\\\"']{0,60}\" node_modules/@toss/tds-mobile/dist node_modules/@toss/tds-mobile-ait/dist)",
+      "mcp__plugin_figma_figma__get_design_context",
+      "Bash(mkdir -p \"C:/workspace/kopo-recommend-location/src/assets\")",
+      "Bash(curl -sSL -o welcome-hero.png \"https://www.figma.com/api/mcp/asset/48b1186b-c3a1-4533-bef7-055d6c1c070d\")",
+      "Bash(curl -sSL -o login-consent-icon.png \"https://www.figma.com/api/mcp/asset/5446911d-0cd1-4c64-9fc4-f6e6bc2e4054\")"
     ]
   }
 }

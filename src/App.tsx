@@ -2,69 +2,42 @@ import "./App.css";
 import { AppProvider, useApp } from "./store";
 import { NavBar } from "./components/NavBar";
 import { IntroScreen } from "./screens/IntroScreen";
+import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { LoginConsentScreen } from "./screens/LoginConsentScreen";
-import { OnboardingScreen } from "./screens/OnboardingScreen";
-import { ParticipantOnboardingScreen } from "./screens/ParticipantOnboardingScreen";
+import { InviteInputScreen } from "./screens/InviteInputScreen";
 import { CreateMeetingScreen } from "./screens/CreateMeetingScreen";
 import { InviteGeneratedScreen } from "./screens/InviteGeneratedScreen";
-import { InviteInputScreen } from "./screens/InviteInputScreen";
-import { TasteHubScreen } from "./screens/TasteHubScreen";
-import { FoodScreen } from "./screens/FoodScreen";
-import { DoneScreen } from "./screens/DoneScreen";
-import { AllDoneScreen } from "./screens/AllDoneScreen";
-import { WaitScreen } from "./screens/WaitScreen";
-import { FindingScreen } from "./screens/FindingScreen";
-import { RelaxedScreen } from "./screens/RelaxedScreen";
-import { ProgressScreen } from "./screens/ProgressScreen";
-import { VoteScreen } from "./screens/VoteScreen";
+import { VoteWaitingScreen } from "./screens/VoteWaitingScreen";
+import { VoteInfoActiveScreen } from "./screens/VoteInfoActiveScreen";
+import { VoteInfoClosedScreen } from "./screens/VoteInfoClosedScreen";
 
-function ScreenSwitcher() {
+// 호스트 흐름:
+//   intro → welcome → login-consent → create-meeting
+//                                  ↳ invite-input (참여자 흐름은 미연결)
+//   create-meeting (목적/인원/위치/마감 시트 overlay) → invite-generated
+//   → wait-others → vote(=VoteInfoActive) → vote-info-closed
+function ScreenRouter() {
   const { screen } = useApp();
-  switch (screen) {
-    case "intro":
-      return <IntroScreen />;
-    case "login-consent":
-      return <LoginConsentScreen />;
-    case "onboarding":
-      return <OnboardingScreen />;
-    case "participant-onboarding":
-      return <ParticipantOnboardingScreen />;
-    case "create-meeting":
-      return <CreateMeetingScreen />;
-    case "invite-generated":
-      return <InviteGeneratedScreen />;
-    case "invite-input":
-      return <InviteInputScreen />;
-    case "q-hub":
-      return <TasteHubScreen />;
-    case "q-food":
-      return <FoodScreen />;
-    case "q-done":
-      return <DoneScreen />;
-    case "wait-others":
-      return <WaitScreen />;
-    case "all-done":
-      return <AllDoneScreen />;
-    case "finding":
-      return <FindingScreen />;
-    case "relaxed":
-      return <RelaxedScreen />;
-    case "progress":
-      return <ProgressScreen />;
-    case "vote":
-      return <VoteScreen />;
-    default:
-      return <IntroScreen />;
-  }
+  return (
+    <div className="screen-body">
+      {screen === "intro" && <IntroScreen />}
+      {screen === "welcome" && <WelcomeScreen />}
+      {screen === "login-consent" && <LoginConsentScreen />}
+      {screen === "invite-input" && <InviteInputScreen />}
+      {screen === "create-meeting" && <CreateMeetingScreen />}
+      {screen === "invite-generated" && <InviteGeneratedScreen />}
+      {screen === "wait-others" && <VoteWaitingScreen />}
+      {screen === "vote" && <VoteInfoActiveScreen />}
+      {screen === "vote-info-closed" && <VoteInfoClosedScreen />}
+    </div>
+  );
 }
 
 function App() {
   return (
     <AppProvider>
       <NavBar />
-      <div className="screen-body">
-        <ScreenSwitcher />
-      </div>
+      <ScreenRouter />
     </AppProvider>
   );
 }

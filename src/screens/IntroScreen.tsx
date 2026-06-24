@@ -1,69 +1,78 @@
-import { Button } from "@toss/tds-mobile";
+import { Asset, BottomCTA, Stepper, StepperRow, Top } from "@toss/tds-mobile";
 import { useApp } from "../store";
-import { IntroCardIllustration } from "../components/icons";
 
+// F-01 진입 시 공통 화면: 앱이 무엇을 해주는지 3스텝으로 설명하고 다음 단계로 보낸다.
+// "다음" → WelcomeScreen(호스트 로그인/참여자 분기 화면).
 export function IntroScreen() {
   const { goto } = useApp();
+
   return (
     <div
       style={{
-        minHeight: "calc(100vh - var(--navbar-height))",
         display: "flex",
         flexDirection: "column",
-        padding: "20px 24px 32px",
-        boxSizing: "border-box",
+        flex: 1,
+        minHeight: 0,
+        background: "#fff",
       }}
     >
-      <IntroCardIllustration />
+      <Top
+        title={
+          <Top.TitleParagraph size={22}>
+            {`어디서 먹을지,\n3~4 곳으로 좁혀드려요`}
+          </Top.TitleParagraph>
+        }
+      />
 
-      <h1
+      <div
         style={{
-          marginTop: 28,
-          fontSize: 26,
-          fontWeight: 800,
-          lineHeight: 1.32,
-          color: "#191F28",
-          letterSpacing: "-0.02em",
+          display: "flex",
+          justifyContent: "center",
+          padding: "16px 0 40px",
         }}
       >
-        다 같이 갈 식당,
-        <br />
-        같이 정해요.
-      </h1>
-      <p
-        style={{
-          marginTop: 16,
-          fontSize: 15,
-          lineHeight: 1.5,
-          color: "#8B95A1",
-        }}
-      >
-        흩어진 의견 그만.
-        <br />
-        조건 모아서 갈 만한 곳만 골라드려요
-      </p>
+        <Asset.Icon
+          name="icon-calendar-timetable"
+          frameShape={{ width: 250, height: 250 }}
+          backgroundColor="transparent"
+        />
+      </div>
 
-      <div style={{ flex: 1 }} />
+      <Stepper>
+        <StepperRow
+          left={<StepperRow.NumberIcon number={1} />}
+          center={
+            <StepperRow.Texts
+              type="A"
+              title="모임 조건을 정하고 친구들을 초대해요"
+            />
+          }
+        />
+        <StepperRow
+          left={<StepperRow.NumberIcon number={2} />}
+          center={
+            <StepperRow.Texts
+              type="A"
+              title="각자 술·예산·음식·분위기를 골라요"
+            />
+          }
+        />
+        <StepperRow
+          hideLine
+          left={<StepperRow.NumberIcon number={3} />}
+          center={
+            <StepperRow.Texts
+              type="A"
+              title="딱 맞는 식당 3~4 곳에 투표해요"
+            />
+          }
+        />
+      </Stepper>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <Button
-          color="primary"
-          variant="fill"
-          size="xlarge"
-          display="block"
-          onClick={() => goto("login-consent")}
-        >
-          토스로 로그인하기
-        </Button>
-        <Button
-          color="dark"
-          variant="weak"
-          size="xlarge"
-          display="block"
-          onClick={() => goto("invite-input")}
-        >
-          이미 초대받은 링크가 있어요
-        </Button>
+      <div style={{ marginTop: "auto" }}>
+        <BottomCTA.Single onClick={() => goto("welcome")}>
+          다음
+        </BottomCTA.Single>
       </div>
     </div>
   );

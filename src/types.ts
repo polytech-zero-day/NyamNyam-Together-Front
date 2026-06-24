@@ -1,5 +1,6 @@
 export type ScreenId =
   | "intro"
+  | "welcome"
   | "login-consent"
   | "onboarding"
   | "participant-onboarding"
@@ -14,7 +15,8 @@ export type ScreenId =
   | "finding"
   | "relaxed"
   | "progress"
-  | "vote";
+  | "vote"
+  | "vote-info-closed";
 
 export type Purpose =
   | "친구들과의 모임"
@@ -64,15 +66,9 @@ export const MOOD_OPTIONS = [
 ] as const;
 export type Mood = (typeof MOOD_OPTIONS)[number];
 
-export const REGIONS = [
-  { id: "gangnam", name: "강남·서초·송파", stations: ["강남역", "신논현역", "양재역", "교대역", "서초역", "잠실역", "삼성역", "송파역"] },
-  { id: "yongsan", name: "용산·마포·서대문", stations: ["용산역", "이태원역", "홍대입구역", "합정역", "공덕역", "신촌역"] },
-  { id: "jongno", name: "종로·동대문", stations: ["종로3가역", "광화문역", "동대문역", "동대문역사문화공원역", "혜화역"] },
-  { id: "seongsu", name: "성수·건대입구", stations: ["성수역", "건대입구역", "뚝섬역", "왕십리역"] },
-  { id: "gwanak", name: "관악·영등포", stations: ["서울대입구역", "신림역", "영등포역", "여의도역", "당산역"] },
-] as const;
-
-export type RegionId = (typeof REGIONS)[number]["id"];
+// 권역/역 데이터는 src/data/stations.ts로 분리 (백엔드 API 연동 시 데이터 파일만 교체하면 됨).
+// 기존 import 경로(`./types`)는 유지하기 위해 type만 re-export.
+export type { RegionId } from "./data/stations";
 
 export interface Restaurant {
   id: string;
