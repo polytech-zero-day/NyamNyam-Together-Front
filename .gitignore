@@ -6,6 +6,7 @@ dist/
 build/
 .next/
 out/
+storybook-static/
 
 # env
 .env
@@ -27,3 +28,6 @@ Thumbs.db
 
 # misc
 *.local
+
+# Claude Code 로컬 설정
+.claude/
