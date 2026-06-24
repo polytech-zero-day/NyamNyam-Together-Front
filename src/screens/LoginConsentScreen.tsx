@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomSheet,
-  List,
-  ListRow,
+  Checkbox,
+  Text,
   TextButton,
   Top,
 } from "@toss/tds-mobile";
@@ -13,28 +14,56 @@ import { getPortalRoot } from "../lib/portal";
 import { APP_LOGO_SRC } from "../components/icons";
 
 // F-04 호스트 토스 로그인 동의 화면.
-// 상단: 아이콘 + 타이틀("냠냠투게더에서 토스로 로그인할까요?").
-// 항상 열린 BottomSheet 로 시안의 약관 동의 시트 시각 구조를 재현.
-// 약관 항목 텍스트는 코드에 박지 않는다(CLAUDE.md F-04 규칙).
-// 실제 약관 동의 UI 는 "동의하고 시작하기" → appLogin() 이 호출되면
-// AIT 콘솔에 등록된 약관으로 토스 앱이 자동으로 띄운다. 여기 placeholder 행은
-// 그 자리(슬롯)만 시각화해두는 용도.
+// 약관 텍스트는 코드에 박지 않는다(CLAUDE.md F-04) — 실제 약관은 앱인토스 콘솔 등록값을
+// appLogin()이 띄운다. 여기 약관 항목/문구는 동의 UX를 보여주기 위한 데모용 예시다.
+// 필수 약관을 모두 체크해야 "동의하고 시작하기"가 활성화된다.
+interface Term {
+  key: "service" | "privacy";
+  label: string;
+  body: string;
+}
+const TERMS: Term[] = [
+  {
+    key: "service",
+    label: "[필수] 서비스 이용약관 동의",
+    body: "본 약관은 냠냠투게더 미니앱 이용 조건을 규정합니다. (데모용 예시 약관 — 실제 약관은 앱인토스 콘솔 등록값을 따릅니다.)",
+  },
+  {
+    key: "privacy",
+    label: "[필수] 개인정보 수집·이용 동의",
+    body: "수집 항목: 토스 사용자 식별값(userKey). 이용 목적: 모임 생성·종료 시 호스트 식별. 보관 기간: 서비스 제공 기간. (데모용 예시)",
+  },
+];
+
 export function LoginConsentScreen() {
   const { goto, back, setRole } = useApp();
   const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState<Record<Term["key"], boolean>>({
+    service: false,
+    privacy: false,
+  });
+  const [openTerm, setOpenTerm] = useState<Term["key"] | null>(null);
+
+  const allChecked = TERMS.every((t) => agreed[t.key]);
+
+  function toggleAll() {
+    const next = !allChecked;
+    setAgreed({ service: next, privacy: next });
+  }
+  function toggleOne(key: Term["key"]) {
+    setAgreed((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
 
   async function handleLogin() {
-    if (loading) return;
+    if (loading || !allChecked) return;
     setLoading(true);
     try {
       // 토스 앱: appLogin() → /auth/login. 그 외(PC/dev): dev-login 우회(api/auth.ts).
-      // 성공 시 host JWT가 토큰 저장소에 들어가 이후 requireToss 요청이 통과한다.
       await loginAsHost();
       setRole("host");
       goto("create-meeting");
     } catch (err) {
       console.error("토스 로그인 실패:", err);
-      // 우회까지 막힌 경우(운영 빌드 등) — 데모 흐름 유지를 위해 진행하되 역할만 표시.
       setRole("host");
       goto("create-meeting");
     } finally {
@@ -74,7 +103,7 @@ export function LoginConsentScreen() {
         />
       </div>
 
-      {/* 시안 그대로의 약관 동의 시트 — 항상 열림. */}
+      {/* 약관 동의 시트 — 항상 열림. 필수 약관 동의 후에만 시작 가능. */}
       <BottomSheet
         open
         onClose={back}
@@ -86,16 +115,10 @@ export function LoginConsentScreen() {
         }
         cta={
           <>
-            <BottomSheet.CTA onClick={handleLogin}>
+            <BottomSheet.CTA onClick={handleLogin} disabled={!allChecked}>
               동의하고 시작하기
             </BottomSheet.CTA>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                  marginBottom: 10
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 12px" }}>
               <TextButton size="xsmall" variant="underline" onClick={back}>
                 다음에
               </TextButton>
@@ -103,22 +126,96 @@ export function LoginConsentScreen() {
           </>
         }
       >
-        {/*
-          약관 항목은 코드에 박지 않는다(CLAUDE.md F-04). 실제 약관 동의 UI는 "동의하고 시작하기"가
-          호출하는 appLogin()이 AIT 콘솔 등록값으로 띄운다. 여기는 그 안내 한 줄만.
-        */}
-        <List>
-          <ListRow
-            contents={
-              <ListRow.Texts
-                type="2RowTypeB"
-                top="필수 약관 동의"
-                bottom="‘동의하고 시작하기’를 누르면 토스 약관에 동의하고 로그인해요"
-              />
-            }
-          />
-        </List>
+        <div style={{ padding: "0 4px 8px" }}>
+          {/* 전체 동의 */}
+          <ConsentRow checked={allChecked} onToggle={toggleAll} bold>
+            약관 전체 동의
+          </ConsentRow>
+
+          <div style={{ height: 1, background: colors.grey100, margin: "2px 12px 6px" }} />
+
+          {TERMS.map((t) => (
+            <div key={t.key}>
+              <ConsentRow
+                checked={agreed[t.key]}
+                onToggle={() => toggleOne(t.key)}
+                right={
+                  <TextButton
+                    size="xsmall"
+                    variant="underline"
+                    onClick={(e: ReactMouseEvent) => {
+                      e.stopPropagation();
+                      setOpenTerm((cur) => (cur === t.key ? null : t.key));
+                    }}
+                  >
+                    보기
+                  </TextButton>
+                }
+              >
+                {t.label}
+              </ConsentRow>
+              {openTerm === t.key && (
+                <div
+                  style={{
+                    margin: "0 12px 8px 40px",
+                    padding: "12px 14px",
+                    background: colors.grey50,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text typography="t7" color={colors.grey600}>
+                    {t.body}
+                  </Text>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </BottomSheet>
     </>
+  );
+}
+
+// 동의 항목 행 — 체크박스(시각) + 라벨. 행 전체 클릭으로 토글.
+function ConsentRow({
+  checked,
+  onToggle,
+  children,
+  right,
+  bold,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  right?: ReactNode;
+  bold?: boolean;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "12px",
+        cursor: "pointer",
+      }}
+    >
+      <span style={{ pointerEvents: "none", display: "flex" }}>
+        <Checkbox.Circle checked={checked} readOnly size={22} aria-hidden tabIndex={-1} />
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          typography="t5"
+          fontWeight={bold ? "bold" : "medium"}
+          color={checked ? colors.grey900 : colors.grey700}
+        >
+          {children}
+        </Text>
+      </span>
+      {right}
+    </div>
   );
 }

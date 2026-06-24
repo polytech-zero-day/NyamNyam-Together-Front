@@ -125,7 +125,6 @@ export function CreateMeetingScreen() {
           icon="🗳"
           label="마감 시간"
           value={meeting.deadline ?? null}
-          emptyHint="투표 마감 시간을 정해요"
           onClick={() => setOpenSheet("date")}
         />
       </List>

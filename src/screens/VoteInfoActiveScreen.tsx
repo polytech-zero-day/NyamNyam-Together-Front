@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react";
 import { useApp } from "../store";
 import { useCloseSession, useProgress, useSession } from "../api";
+import { compactDeadline } from "../lib/format";
 import womanIcon from "../assets/woman-fill-circle.svg";
 
 // F-13 투표 정보(진행중). 모임의 모든 설정값과 현재 투표 진행 상황을 한 화면에 표시.
@@ -140,7 +141,7 @@ export function VoteInfoActiveScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {meeting.deadline ?? "2026년 6월 26일 오후 2시"}
+              {compactDeadline(meeting.deadline)}
             </ListHeader.RightText>
           }
         />

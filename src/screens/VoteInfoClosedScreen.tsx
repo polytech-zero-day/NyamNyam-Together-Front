@@ -1,6 +1,7 @@
 import { Asset, Badge, BottomCTA, Border, ListHeader } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { isNotReady, useRecommendations } from "../api";
+import { compactDeadline } from "../lib/format";
 import womanIcon from "../assets/woman-fill-circle.svg";
 
 // F-13 투표 정보(종료). 종료 상태값 표시. 식당 정보는 최다 득표 1위(추천 응답)로 채운다.
@@ -106,7 +107,7 @@ export function VoteInfoClosedScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {meeting.deadline ?? "2026년 6월 26일 오후 2시"}
+              {compactDeadline(meeting.deadline)}
             </ListHeader.RightText>
           }
         />
@@ -171,17 +172,19 @@ export function VoteInfoClosedScreen() {
             </ListHeader.RightText>
           }
         />
+        {/* 주소는 길어서 우측 한 줄에 안 들어감 → 라벨 아래 전체폭으로(줄바꿈 허용). */}
         <ListHeader
           title={
             <ListHeader.TitleParagraph typography="t5" fontWeight="bold">
               식당 주소
             </ListHeader.TitleParagraph>
           }
-          right={
-            <ListHeader.RightText typography="t6">
+          description={
+            <ListHeader.DescriptionParagraph>
               {restaurantAddress}
-            </ListHeader.RightText>
+            </ListHeader.DescriptionParagraph>
           }
+          descriptionPosition="bottom"
         />
       </div>
 
