@@ -90,9 +90,11 @@ function ScreenRouter() {
     [cards],
   );
 
-  // 참여자 1차 응답 진행률(N/M) — q-done 대기 화면에서만 폴링.
+  // 진행률(N/정원) — q-done(1차) 과 second-vote-waiting(2차) 대기 화면에서 폴링.
   const progressQuery = useProgress(sessionId, {
-    enabled: sessionId != null && screen === "q-done",
+    enabled:
+      sessionId != null &&
+      (screen === "q-done" || screen === "second-vote-waiting"),
   });
   const responded = progressQuery.data?.responded ?? 0;
   // 분모는 정원(현재 참여 인원과 정원 중 큰 값). 호스트도 완전한 참여자로 포함된다.
@@ -100,6 +102,10 @@ function ScreenRouter() {
     progressQuery.data?.total ?? 0,
     progressQuery.data?.min ?? 0,
   );
+  // stage2(식당) 투표 현황 — 추천 응답의 voteCount 합 = 지금까지 던진 표 수.
+  const stage2Voted = recs
+    ? recs.recommendations.reduce((s, r) => s + (r.voteCount ?? 0), 0)
+    : 0;
 
   const stage1 = useStage1Vote(sessionId ?? "");
   const stage2 = useStage2Vote(sessionId ?? "");
@@ -193,7 +199,11 @@ function ScreenRouter() {
         />
       )}
       {screen === "second-vote-waiting" && (
-        <SecondVoteWaitingScreen onComplete={() => goto("vote-counting")} />
+        <SecondVoteWaitingScreen
+          votedCount={stage2Voted}
+          totalCount={total}
+          onComplete={() => goto("vote-counting")}
+        />
       )}
       {screen === "vote-counting" && (
         <VoteCountingScreen onComplete={() => goto("final-result")} />
