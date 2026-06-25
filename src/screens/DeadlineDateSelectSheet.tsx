@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, BottomSheet, List, ListRow, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
@@ -51,6 +51,28 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
   const today = todayIso();
   const initialDate = meeting.deadline?.split(" ")[0] ?? today;
   const [date, setDate] = useState<string>(initialDate);
+  const dateRef = useRef<HTMLInputElement>(null);
+
+  // 현재 선택이 프리셋(오늘/내일/모레/일주일)에 해당하는지 — 아니면 '직접 선택'으로 표시.
+  const isPreset = PRESETS.some(
+    ({ daysFromToday }) => addDays(today, daysFromToday) === date,
+  );
+
+  // 네이티브 날짜 피커 열기(iOS 회색 박스 노출 없이). showPicker 미지원 시 focus 폴백.
+  function openNativePicker() {
+    const el = dateRef.current;
+    if (!el) return;
+    if (typeof el.showPicker === "function") {
+      try {
+        el.showPicker();
+        return;
+      } catch {
+        /* 사용자 제스처 컨텍스트 밖이면 폴백 */
+      }
+    }
+    el.focus();
+    el.click();
+  }
 
   function handleNext() {
     // 시간 부분이 이미 저장되어 있으면 보존. 없으면 날짜만.
@@ -73,34 +95,24 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
       }
       cta={<SheetDoubleCTA onClose={onClose} onNext={handleNext} />}
     >
-      <div style={{ padding: "8px 24px 16px" }}>
-        <Text
-          typography="t6"
-          color={colors.grey500}
-          style={{ display: "block", margin: "0 0 6px" }}
-        >
-          직접 선택 · {formatKorean(date)}
-        </Text>
-        <input
-          type="date"
-          value={date}
-          min={today}
-          onChange={(e) => setDate(e.target.value)}
-          aria-label="마감 날짜 직접 선택"
-          style={{
-            width: "100%",
-            boxSizing: "border-box", // padding 포함 폭 계산 — 모바일 가로 넘침 방지
-            padding: "14px 16px",
-            fontSize: 16, // iOS 자동 줌 방지(≥16)
-            textAlign: "left",
-            border: "none",
-            background: colors.grey100,
-            borderRadius: 12,
-            color: colors.grey800,
-            fontFamily: "inherit",
-          }}
-        />
-      </div>
+      {/* 날짜 값만 들고 있는 히든 input — iOS 회색 박스를 노출하지 않고 네이티브 피커만 띄운다. */}
+      <input
+        ref={dateRef}
+        type="date"
+        value={date}
+        min={today}
+        onChange={(e) => e.target.value && setDate(e.target.value)}
+        aria-hidden
+        tabIndex={-1}
+        style={{
+          position: "absolute",
+          left: -9999,
+          width: 1,
+          height: 1,
+          opacity: 0,
+          pointerEvents: "none",
+        }}
+      />
       <List>
         {PRESETS.map(({ label, daysFromToday }) => {
           const presetDate = addDays(today, daysFromToday);
@@ -122,6 +134,20 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
             />
           );
         })}
+        {/* 직접 선택 — 누르면 네이티브 날짜 피커. 우측에 현재 선택 날짜 표시. */}
+        <ListRow
+          contents={<ListRow.Texts type="1RowTypeA" top="직접 선택" />}
+          right={
+            <Text
+              typography="t6"
+              color={isPreset ? colors.grey500 : colors.blue500}
+              fontWeight={isPreset ? "regular" : "semibold"}
+            >
+              {formatKorean(date)}
+            </Text>
+          }
+          onClick={openNativePicker}
+        />
       </List>
     </BottomSheet>
   );
