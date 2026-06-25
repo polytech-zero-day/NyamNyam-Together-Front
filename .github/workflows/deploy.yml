@@ -1,0 +1,40 @@
+name: Deploy (.ait → Apps in Toss)
+
+# main 푸시 시 자동 배포 + 수동 실행(workflow_dispatch) 둘 다 지원.
+# 매 커밋 배포가 과하면 push 트리거를 빼고 workflow_dispatch 만 남기면 된다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 동시 배포 방지(앞 배포가 끝나기 전 새 푸시가 오면 직전 것 취소).
+concurrency:
+  group: deploy-ait
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: build · ait deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (.ait)
+        env:
+          # vite 는 빌드 시 VITE_* 환경변수를 번들에 주입한다.
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ENABLE_DEV_LOGIN: ${{ vars.VITE_ENABLE_DEV_LOGIN }}
+        run: npm run build
+
+      - name: Deploy to Apps in Toss
+        run: npm run deploy -- --api-key "${{ secrets.APPS_IN_TOSS_API_KEY }}" -m "CI ${{ github.sha }}"
