@@ -29,7 +29,7 @@ export const handlers = [
   http.post(url("/sessions/:id/finalize"), () =>
     HttpResponse.json({ winnerRecommendationId: "rec_2", tie: false }),
   ),
-  http.get(url("/sessions/:id/progress"), () => HttpResponse.json({ responded: 3, total: 4 })),
+  http.get(url("/sessions/:id/progress"), () => HttpResponse.json({ responded: 3, total: 4, min: 4 })),
   http.post(url("/sessions/:id/join"), () =>
     HttpResponse.json({ message: "참여가 완료됐습니다" }, { status: 201 }),
   ),

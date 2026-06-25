@@ -93,7 +93,11 @@ function ScreenRouter() {
     enabled: sessionId != null && screen === "q-done",
   });
   const responded = progressQuery.data?.responded ?? 0;
-  const total = progressQuery.data?.total ?? 0;
+  // 분모는 목표 인원(현재 참여 인원과 최소 인원 중 큰 값). 호스트는 백엔드 progress 에서 제외됨.
+  const total = Math.max(
+    progressQuery.data?.total ?? 0,
+    progressQuery.data?.min ?? 0,
+  );
 
   const setSortMut = useSetSort(sessionId ?? "");
   const stage2 = useStage2Vote(sessionId ?? "");

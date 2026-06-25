@@ -66,7 +66,8 @@ export interface SessionResponse {
 
 export interface ProgressResponse {
   responded: number;
-  total: number;
+  total: number; // 호스트 제외, 현재 참여(join)한 인원 수
+  min: number; // 최소 인원(목표). 분모 표시는 max(total, min) 사용
 }
 
 export interface MessageResponse {
