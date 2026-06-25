@@ -7,22 +7,56 @@ import {
   CTAButton,
   ListHeader,
 } from "@toss/tds-mobile";
+import { useEffect, useState } from "react";
 import { useApp } from "../store";
+import { useCloseSession, useProgress, useSession } from "../api";
+import { compactDeadline } from "../lib/format";
 import womanIcon from "../assets/woman-fill-circle.svg";
 
-
-
 // F-13 투표 정보(진행중). 모임의 모든 설정값과 현재 투표 진행 상황을 한 화면에 표시.
-// 백엔드 연동 전 — 호스트 이름/투표 인원/남은 시간/식당 정보는 더미.
-// 내용이 길어 세로 스크롤이 자동 생성되도록 flex+overflow 처리.
+// 투표 인원은 GET /progress 폴링, 남은 시간은 session.deadline 카운트다운, 강제종료는 POST /close.
+// (호스트 이름은 백엔드에 없어 placeholder 유지)
 const HOST_NAME = "김토스";
-const VOTED_COUNT = 1;
-const TIME_LEFT = "58:35:26";
+
+// deadline(ISO) → 남은 시간 "HH:MM:SS". 없으면 "--:--:--", 지났으면 00:00:00.
+function formatRemaining(deadlineIso: string | null | undefined, nowMs: number): string {
+  if (!deadlineIso) return "--:--:--";
+  const end = new Date(deadlineIso).getTime();
+  if (isNaN(end)) return "--:--:--";
+  let s = Math.max(0, Math.floor((end - nowMs) / 1000));
+  const h = Math.floor(s / 3600);
+  s %= 3600;
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${p(h)}:${p(m)}:${p(sec)}`;
+}
 
 export function VoteInfoActiveScreen() {
-  const { meeting, back, goto } = useApp();
+  const { meeting, back, goto, sessionId } = useApp();
+  const progress = useProgress(sessionId, { enabled: sessionId != null });
+  const session = useSession(sessionId);
+  const close = useCloseSession(sessionId ?? "");
 
-  const totalMembers = meeting.minMembers ?? 3;
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const TIME_LEFT = formatRemaining(session.data?.deadline, nowMs);
+
+  const respondedCount = progress.data?.responded ?? 0;
+  const totalMembers = progress.data?.total ?? meeting.minMembers ?? 3;
+
+  async function handleForceClose() {
+    if (close.isPending) return;
+    try {
+      await close.mutateAsync();
+    } catch (err) {
+      console.error("투표 종료 실패:", err);
+    }
+    goto("vote-info-closed");
+  }
 
   return (
     <div
@@ -107,7 +141,7 @@ export function VoteInfoActiveScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {meeting.deadline ?? "2026년 6월 26일 오후 2시"}
+              {compactDeadline(meeting.deadline)}
             </ListHeader.RightText>
           }
         />
@@ -136,7 +170,7 @@ export function VoteInfoActiveScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {`${VOTED_COUNT}/${totalMembers} 명`}
+              {`${respondedCount}/${totalMembers} 명`}
             </ListHeader.RightText>
           }
         />
@@ -201,10 +235,8 @@ export function VoteInfoActiveScreen() {
           <CTAButton
             color="dark"
             variant="weak"
-            onClick={() => {
-              // TODO(backend): 호스트 강제 종료 API. 데모: 바로 종료 화면으로.
-              goto("vote-info-closed");
-            }}
+            disabled={close.isPending}
+            onClick={handleForceClose}
           >
             투표 강제종료
           </CTAButton>

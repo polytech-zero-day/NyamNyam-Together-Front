@@ -1,0 +1,33 @@
+name: CI
+
+# main 으로의 push / main 을 대상으로 하는 PR 마다 lint·테스트·스토리북 빌드를 실행한다.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: lint · vitest · storybook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests (Vitest)
+        run: npm test
+
+      - name: Build Storybook
+        run: npm run build-storybook

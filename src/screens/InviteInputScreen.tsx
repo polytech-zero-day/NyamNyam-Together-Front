@@ -4,14 +4,30 @@ import { useApp } from "../store";
 
 // F-04 참여자 초대 링크 입력. 호스트가 공유한 링크(?groupId=...)를 붙여넣고 진입한다.
 // 참여자는 익명(무로그인)이므로 로그인 없이 바로 응답 단계로 이동한다.
+
+// 링크/문자열에서 groupId(=sessionId) 추출. URL·"groupId=xxx"·순수 id 모두 허용.
+function parseGroupId(link: string): string | null {
+  const trimmed = link.trim();
+  if (!trimmed) return null;
+  try {
+    const g = new URL(trimmed).searchParams.get("groupId");
+    if (g) return g;
+  } catch {
+    // URL 아님 — 아래 정규식/원문으로 폴백
+  }
+  const m = /groupId=([^&\s]+)/.exec(trimmed);
+  return m ? m[1] : trimmed;
+}
+
 export function InviteInputScreen() {
-  const { goto } = useApp();
+  const { goto, setSessionId, setRole } = useApp();
   const [link, setLink] = useState("");
 
   function handleConfirm() {
-    if (!link.trim()) return;
-    // TODO(backend): link에서 groupId 파싱 + 유효성 검사(존재/마감 여부) 후 입장.
-    // 지금은 입력값이 있으면 통과시킨다.
+    const groupId = parseGroupId(link);
+    if (!groupId) return;
+    setSessionId(groupId);
+    setRole("participant");
     goto("participant-onboarding");
   }
 
@@ -42,7 +58,11 @@ export function InviteInputScreen() {
       />
 
       <div style={{ marginTop: "auto" }}>
-        <BottomCTA.Single onClick={handleConfirm} fixedAboveKeyboard>
+        <BottomCTA.Single
+          onClick={handleConfirm}
+          disabled={!link.trim()}
+          fixedAboveKeyboard
+        >
           확인
         </BottomCTA.Single>
       </div>

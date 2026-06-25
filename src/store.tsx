@@ -12,7 +12,6 @@ import type {
   FoodCategory,
   Mood,
   Purpose,
-  RegionId,
   ScreenId,
   SortOrder,
 } from "./types";
@@ -20,10 +19,15 @@ import type {
 interface MeetingForm {
   purpose?: Purpose;
   minMembers?: number;
-  regionId?: RegionId;
+  regionId?: string; // GET /stations 권역 id
   station?: string;
-  deadline?: string;
+  // 역 좌표 — GET /stations 응답에서 선택 시 함께 저장(백엔드 station_places 미시드 대비 back-compat).
+  stationLat?: number;
+  stationLng?: number;
+  deadline?: string; // "YYYY-MM-DD HH:MM"
 }
+
+export type Role = "host" | "participant";
 
 interface ParticipantForm {
   alcohol?: Alcohol;
@@ -51,6 +55,19 @@ interface AppState {
   // 기본값은 "reviews" — CLAUDE.md 3.6 "미선택 시 기본값=리뷰순".
   sort: SortOrder;
   setSort: (s: SortOrder) => void;
+  // 백엔드 세션 식별자. host=생성 응답에서, 참여자=초대 링크(?groupId=)에서 채워진다.
+  sessionId: string | null;
+  setSessionId: (id: string | null) => void;
+  // 역할 — host(모임 생성자) / participant(링크 입장). 인증·권한 분기에 사용.
+  role: Role | null;
+  setRole: (r: Role | null) => void;
+}
+
+// 초대 링크의 groupId = 백엔드 sessionId.
+function getInitialGroupId(): string | null {
+  if (typeof window === "undefined") return null;
+  const g = new URLSearchParams(window.location.search).get("groupId");
+  return g != null && g !== "" ? g : null;
 }
 
 const AppCtx = createContext<AppState | null>(null);
@@ -76,6 +93,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   });
   const [voted, setVoted] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOrder>("reviews");
+  const initialGroupId = getInitialGroupId();
+  const [sessionId, setSessionId] = useState<string | null>(initialGroupId);
+  const [role, setRole] = useState<Role | null>(
+    initialGroupId != null ? "participant" : null,
+  );
 
   const goto = useCallback(
     (s: ScreenId) => {
@@ -116,6 +138,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setVoted,
       sort,
       setSort,
+      sessionId,
+      setSessionId,
+      role,
+      setRole,
     }),
     [
       screen,
@@ -127,6 +153,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       patchParticipant,
       voted,
       sort,
+      sessionId,
+      role,
     ],
   );
 

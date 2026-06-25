@@ -1,48 +1,74 @@
-import { appLogin } from "@apps-in-toss/web-framework";
+import { useState, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
+import { colors } from "@toss/tds-colors";
 import {
   Asset,
   BottomSheet,
-  List,
-  ListRow,
+  Checkbox,
+  Text,
   TextButton,
   Top,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { loginAsHost } from "../api";
+import { showToast } from "../lib/toast";
 import { getPortalRoot } from "../lib/portal";
 import { APP_LOGO_SRC } from "../components/icons";
 
 // F-04 호스트 토스 로그인 동의 화면.
-// 상단: 아이콘 + 타이틀("냠냠투게더에서 토스로 로그인할까요?").
-// 항상 열린 BottomSheet 로 시안의 약관 동의 시트 시각 구조를 재현.
-// 약관 항목 텍스트는 코드에 박지 않는다(CLAUDE.md F-04 규칙).
-// 실제 약관 동의 UI 는 "동의하고 시작하기" → appLogin() 이 호출되면
-// AIT 콘솔에 등록된 약관으로 토스 앱이 자동으로 띄운다. 여기 placeholder 행은
-// 그 자리(슬롯)만 시각화해두는 용도.
+// 약관 텍스트는 코드에 박지 않는다(CLAUDE.md F-04) — 실제 약관은 앱인토스 콘솔 등록값을
+// appLogin()이 띄운다. 여기 약관 항목/문구는 동의 UX를 보여주기 위한 데모용 예시다.
+// 필수 약관을 모두 체크해야 "동의하고 시작하기"가 활성화된다.
+interface Term {
+  key: "service" | "privacy";
+  label: string;
+  body: string;
+}
+const TERMS: Term[] = [
+  {
+    key: "service",
+    label: "[필수] 서비스 이용약관 동의",
+    body: "본 약관은 냠냠투게더 미니앱 이용 조건을 규정합니다. (데모용 예시 약관 — 실제 약관은 앱인토스 콘솔 등록값을 따릅니다.)",
+  },
+  {
+    key: "privacy",
+    label: "[필수] 개인정보 수집·이용 동의",
+    body: "수집 항목: 토스 사용자 식별값(userKey). 이용 목적: 모임 생성·종료 시 호스트 식별. 보관 기간: 서비스 제공 기간. (데모용 예시)",
+  },
+];
+
 export function LoginConsentScreen() {
-  const { goto, back } = useApp();
+  const { goto, back, setRole } = useApp();
+  const [loading, setLoading] = useState(false);
+  const [agreed, setAgreed] = useState<Record<Term["key"], boolean>>({
+    service: false,
+    privacy: false,
+  });
+  const [openTerm, setOpenTerm] = useState<Term["key"] | null>(null);
+
+  const allChecked = TERMS.every((t) => agreed[t.key]);
+
+  function toggleAll() {
+    const next = !allChecked;
+    setAgreed({ service: next, privacy: next });
+  }
+  function toggleOne(key: Term["key"]) {
+    setAgreed((prev) => ({ ...prev, [key]: !prev[key] }));
+  }
 
   async function handleLogin() {
-    // 토스 웹뷰가 아닌 환경(PC 브라우저·dev·헤드리스)에서는 appLogin() 의 비동기
-    // 브리지 응답이 영영 오지 않아 promise 가 pending 으로 멈춘다(browser-shim 주석 참고).
-    // 이런 환경에선 네이티브 로그인을 건너뛰고 바로 다음 화면으로 진행한다.
-    // 실기기(ReactNativeWebView 존재)에서는 정상적으로 appLogin() 을 호출한다.
-    const isBrowserShim =
-      typeof window !== "undefined" && window.__NYAM_BROWSER_SHIM__ === true;
-    if (isBrowserShim) {
-      goto("create-meeting");
-      return;
-    }
-
+    if (loading || !allChecked) return;
+    setLoading(true);
     try {
-      const { authorizationCode } = await appLogin();
-      // TODO(backend): authorizationCode 를 서버에 보내 host userKey 발급 / 세션 생성
-      console.log("[host login] authorizationCode:", authorizationCode);
+      // 토스 앱: appLogin() → /auth/login. 그 외(PC/dev): dev-login 우회(api/auth.ts).
+      await loginAsHost();
+      setRole("host");
       goto("create-meeting");
     } catch (err) {
-      // 사용자가 거부했거나 SDK 호출 실패.
-      // 데모 흐름을 막지 않기 위해 다음 화면으로 그대로 진행.
+      // appLogin·dev-login 모두 실패 — 안내 후 화면에 머문다.
       console.error("토스 로그인 실패:", err);
-      goto("create-meeting");
+      showToast("로그인에 실패했어요. 잠시 후 다시 시도해주세요.", "error");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -78,7 +104,7 @@ export function LoginConsentScreen() {
         />
       </div>
 
-      {/* 시안 그대로의 약관 동의 시트 — 항상 열림. */}
+      {/* 약관 동의 시트 — 항상 열림. 필수 약관 동의 후에만 시작 가능. */}
       <BottomSheet
         open
         onClose={back}
@@ -90,16 +116,10 @@ export function LoginConsentScreen() {
         }
         cta={
           <>
-            <BottomSheet.CTA onClick={handleLogin}>
+            <BottomSheet.CTA onClick={handleLogin} disabled={!allChecked}>
               동의하고 시작하기
             </BottomSheet.CTA>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "8px 0 0",
-              }}
-            >
+            <div style={{ display: "flex", justifyContent: "center", padding: "8px 0 12px" }}>
               <TextButton size="xsmall" variant="underline" onClick={back}>
                 다음에
               </TextButton>
@@ -107,22 +127,96 @@ export function LoginConsentScreen() {
           </>
         }
       >
-        {/*
-          약관 항목은 코드에 박지 않는다.
-          이 행들은 실제 동의 항목이 "이 자리에 표시된다" 는 슬롯 placeholder 일 뿐 —
-          진짜 약관과 동의는 위 CTA 가 호출하는 appLogin() 이 AIT 콘솔 등록값으로 띄운다.
-        */}
-        <List>
-          <ListRow
-            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
-            withArrow
-          />
-          <ListRow
-            contents={<ListRow.Texts type="1RowTypeA" top="약관 동의" />}
-            withArrow
-          />
-        </List>
+        <div style={{ padding: "0 4px 8px" }}>
+          {/* 전체 동의 */}
+          <ConsentRow checked={allChecked} onToggle={toggleAll} bold>
+            약관 전체 동의
+          </ConsentRow>
+
+          <div style={{ height: 1, background: colors.grey100, margin: "2px 12px 6px" }} />
+
+          {TERMS.map((t) => (
+            <div key={t.key}>
+              <ConsentRow
+                checked={agreed[t.key]}
+                onToggle={() => toggleOne(t.key)}
+                right={
+                  <TextButton
+                    size="xsmall"
+                    variant="underline"
+                    onClick={(e: ReactMouseEvent) => {
+                      e.stopPropagation();
+                      setOpenTerm((cur) => (cur === t.key ? null : t.key));
+                    }}
+                  >
+                    보기
+                  </TextButton>
+                }
+              >
+                {t.label}
+              </ConsentRow>
+              {openTerm === t.key && (
+                <div
+                  style={{
+                    margin: "0 12px 8px 40px",
+                    padding: "12px 14px",
+                    background: colors.grey50,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text typography="t7" color={colors.grey600}>
+                    {t.body}
+                  </Text>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </BottomSheet>
     </>
+  );
+}
+
+// 동의 항목 행 — 체크박스(시각) + 라벨. 행 전체 클릭으로 토글.
+function ConsentRow({
+  checked,
+  onToggle,
+  children,
+  right,
+  bold,
+}: {
+  checked: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+  right?: ReactNode;
+  bold?: boolean;
+}) {
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={onToggle}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "12px",
+        cursor: "pointer",
+      }}
+    >
+      <span style={{ pointerEvents: "none", display: "flex" }}>
+        <Checkbox.Circle checked={checked} readOnly size={22} aria-hidden tabIndex={-1} />
+      </span>
+      <span style={{ flex: 1, minWidth: 0 }}>
+        <Text
+          typography="t5"
+          fontWeight={bold ? "bold" : "medium"}
+          color={checked ? colors.grey900 : colors.grey700}
+        >
+          {children}
+        </Text>
+      </span>
+      {right}
+    </div>
   );
 }

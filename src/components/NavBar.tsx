@@ -1,4 +1,5 @@
 import { useApp } from "../store";
+import { closeApp } from "../lib/appActions";
 import { AppLogoMark } from "./icons";
 
 export function NavBar() {
@@ -66,35 +67,15 @@ export function NavBar() {
           alignItems: "center",
           background: "#F2F4F6",
           borderRadius: 999,
-          padding: "6px 8px",
-          gap: 8,
+          padding: "6px 12px",
         }}
       >
         <button
           type="button"
-          aria-label="더 보기"
-          style={{
-            background: "none",
-            border: "none",
-            padding: "0 4px",
-            color: "#4E5968",
-            cursor: "pointer",
-            fontSize: 18,
-            lineHeight: 1,
-          }}
-        >
-          ⋯
-        </button>
-        <span
-          style={{
-            width: 1,
-            height: 14,
-            background: "#D1D6DB",
-          }}
-        />
-        <button
-          type="button"
           aria-label="닫기"
+          onClick={() => {
+            void closeApp();
+          }}
           style={{
             background: "none",
             border: "none",

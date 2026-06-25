@@ -1,16 +1,28 @@
 import { colors } from "@toss/tds-colors";
 import { Asset, BottomCTA, CTAButton, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { useCloseSession, useProgress } from "../api";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-13/F-14 투표 대기 화면. 호스트가 "투표 현황보기"로 진입했을 때 보는 진행 상황.
-// 좌측 "투표 강제종료" → host가 마감 시간 전에 강제 종료(F-09). 우측 "자세히보기" → 14번 상세.
-// 더미: 참여 인원/총 인원은 백엔드 연동 시 실제 값으로 교체.
-const VOTED_COUNT = 1;
-const TOTAL_COUNT = 3;
-
+// 좌측 "투표 강제종료" → host가 마감 시간 전에 강제 종료(F-09, POST /close → 집계 트리거).
+// 우측 "자세히보기" → 14번 상세. 진행률(N/M)은 GET /progress 폴링.
 export function VoteWaitingScreen() {
-  const { goto } = useApp();
+  const { goto, sessionId } = useApp();
+  const progress = useProgress(sessionId, { enabled: sessionId != null });
+  const close = useCloseSession(sessionId ?? "");
+  const respondedCount = progress.data?.responded ?? 0;
+  const totalCount = progress.data?.total ?? 0;
+
+  async function handleForceClose() {
+    if (close.isPending) return;
+    try {
+      await close.mutateAsync(); // collecting → aggregating(추천 작성)
+    } catch (err) {
+      console.error("투표 종료 실패:", err);
+    }
+    goto("vote-info-closed");
+  }
 
   return (
     <div
@@ -52,7 +64,7 @@ export function VoteWaitingScreen() {
           color={colors.grey500}
           style={{ textAlign: "center" }}
         >
-          {`투표 진행 중 ( ${VOTED_COUNT} / ${TOTAL_COUNT} )`}
+          {`투표 진행 중 ( ${respondedCount} / ${totalCount} )`}
         </Text>
       </div>
 
@@ -61,11 +73,8 @@ export function VoteWaitingScreen() {
           <CTAButton
             color="dark"
             variant="weak"
-            onClick={() => {
-              // TODO(backend): 호스트 강제 종료 API → 종료 시점 스냅샷.
-              // 데모: 바로 종료 결과 화면으로 이동.
-              goto("vote-info-closed");
-            }}
+            disabled={close.isPending}
+            onClick={handleForceClose}
           >
             투표 강제종료
           </CTAButton>

@@ -10,6 +10,7 @@ import {
   Top,
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
+import { useCreateSession } from "../api";
 import { PurposeSelectSheet } from "./PurposeSelectSheet";
 import { MembersSelectSheet } from "./MembersSelectSheet";
 import { StationRegionSelectSheet } from "./StationRegionSelectSheet";
@@ -29,9 +30,41 @@ type OpenSheet =
   | "time"
   | null;
 
+// store deadline("YYYY-MM-DD HH:MM") → ISO. 파싱 실패 시 undefined(마감 없이 생성, 호스트 수동 종료).
+function toIsoDeadline(deadline?: string): string | undefined {
+  if (!deadline) return undefined;
+  const [date, time] = deadline.split(" ");
+  if (!date) return undefined;
+  const d = new Date(`${date}T${time ?? "00:00"}:00`);
+  return isNaN(d.getTime()) ? undefined : d.toISOString();
+}
+
 export function CreateMeetingScreen() {
-  const { meeting, back, goto } = useApp();
+  const { meeting, back, goto, setSessionId, setRole } = useApp();
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
+  const createSession = useCreateSession();
+
+  async function handleSave() {
+    if (!isComplete || createSession.isPending) return;
+    try {
+      const res = await createSession.mutateAsync({
+        stationId: meeting.station!,
+        stationLat: meeting.stationLat,
+        stationLng: meeting.stationLng,
+        // 제목 입력 화면이 없어 역·목적 기반 기본 제목 사용.
+        title: `${meeting.station} ${meeting.purpose ?? "모임"}`,
+        minParticipants: meeting.minMembers,
+        purpose: meeting.purpose,
+        deadline: toIsoDeadline(meeting.deadline),
+      });
+      setSessionId(res.sessionId);
+      setRole("host");
+      goto("invite-generated");
+    } catch (err) {
+      console.error("모임 생성 실패:", err);
+      // TODO: 토스트로 실패 안내
+    }
+  }
 
   const filledCount = [
     meeting.purpose,
@@ -92,7 +125,6 @@ export function CreateMeetingScreen() {
           icon="🗳"
           label="마감 시간"
           value={meeting.deadline ?? null}
-          emptyHint="투표 마감 시간을 정해요"
           onClick={() => setOpenSheet("date")}
         />
       </List>
@@ -107,8 +139,8 @@ export function CreateMeetingScreen() {
           rightButton={
             <CTAButton
               color="primary"
-              disabled={!isComplete}
-              onClick={() => goto("invite-generated")}
+              disabled={!isComplete || createSession.isPending}
+              onClick={handleSave}
             >
               저장
             </CTAButton>
