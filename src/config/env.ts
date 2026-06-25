@@ -1,10 +1,10 @@
 // 런타임 환경설정. 값은 vite import.meta.env(.env/.env.local)에서 주입.
-// 백엔드는 Supabase Edge Function(Deno+Hono) 단일 함수 server(basePath '/server').
-//   · 로컬:   supabase functions serve server --no-verify-jwt
-//             → http://localhost:54321/functions/v1/server
-//   · 배포:   https://<project-ref>.supabase.co/functions/v1/server
+// 백엔드는 Supabase Edge Function(Deno+Hono) 단일 함수 api(basePath '/api').
+//   · 로컬:   supabase functions serve api --no-verify-jwt
+//             → http://localhost:54321/functions/v1/api
+//   · 배포:   https://<project-ref>.supabase.co/functions/v1/api
 
-const DEFAULT_BASE = "http://localhost:54321/functions/v1/server";
+const DEFAULT_BASE = "http://localhost:54321/functions/v1/api";
 
 /** 모든 API 경로의 prefix. 끝 슬래시는 제거해 path와 안전하게 연결. */
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE).replace(/\/+$/, "");
