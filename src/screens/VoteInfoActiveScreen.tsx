@@ -46,16 +46,20 @@ export function VoteInfoActiveScreen() {
   const TIME_LEFT = formatRemaining(session.data?.deadline, nowMs);
 
   const respondedCount = progress.data?.responded ?? 0;
-  const totalMembers = progress.data?.total ?? meeting.minMembers ?? 3;
+  // '최소 인원'은 모임 설정값(min_participants)을 표시한다 — 현재 참여 인원과 별개.
+  const minMembers = session.data?.min_participants ?? meeting.minMembers ?? 3;
+  // '투표 인원'의 분모는 목표 인원(현재 참여 인원과 최소 인원 중 큰 값).
+  const totalMembers = Math.max(progress.data?.total ?? 0, minMembers);
 
   async function handleForceClose() {
     if (close.isPending) return;
     try {
       await close.mutateAsync();
+      // 호스트는 집계 대기(finding) 후 정렬을 지정(sort-select)하고 후보 투표로 이어진다.
+      goto("finding");
     } catch (err) {
       console.error("투표 종료 실패:", err);
     }
-    goto("vote-info-closed");
   }
 
   return (
@@ -117,7 +121,7 @@ export function VoteInfoActiveScreen() {
           }
           right={
             <ListHeader.RightText typography="t6">
-              {`${totalMembers}명`}
+              {`${minMembers}명`}
             </ListHeader.RightText>
           }
         />
