@@ -115,8 +115,9 @@ export function InviteGeneratedScreen() {
           </CTAButton>
         }
         rightButton={
-          <CTAButton color="primary" onClick={() => goto("wait-others")}>
-            투표 현황보기
+          // 호스트도 완전한 참여자 — 본인 취향 입력(stage1)부터 진행한다.
+          <CTAButton color="primary" onClick={() => goto("q-hub")}>
+            투표하러 가기
           </CTAButton>
         }
       />

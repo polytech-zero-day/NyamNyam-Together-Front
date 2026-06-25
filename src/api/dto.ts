@@ -81,6 +81,7 @@ export interface Stage1VoteRequest {
   budgetMax: number;
   categories?: string[];
   mood?: BackendMood;
+  sortPref?: BackendSortMode; // 정렬 기준 투표(다수결로 후보 정렬 결정)
 }
 export interface Stage2VoteRequest {
   restaurantId: string; // recommendation id(recId)

@@ -127,8 +127,8 @@ function RestaurantCard({
       type="button"
       onClick={onClick}
       style={{
-        width: 320,
-        height: 200,
+        width: "100%",
+        maxWidth: 320,
         borderRadius: 20,
         // 시안: 선택 4px 진한 주황 + inset shadow / 미선택 0.7px 연한 주황
         border: selected
@@ -138,27 +138,29 @@ function RestaurantCard({
         background: colors.white,
         padding: 0,
         overflow: "hidden",
-        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0, // 세로 스크롤 리스트(flex column)에서 카드가 찌부러지지 않게
         cursor: "pointer",
       }}
     >
-      {/* imageUrl: 백엔드가 구글 라이브 사진 URL을 주면 그대로, 없으면 adapters 에서 placeholder 폴백. */}
-      <Asset.Image
+      {/* imageUrl: 백엔드 라이브 구글 사진(없으면 placeholder). 고정 높이로 자르지 않고
+          4:3 비율로 펼쳐 사진을 온전히 보여준다(가로폭에 맞춰 높이 자동). */}
+      <img
         src={restaurant.imageUrl}
-        frameShape={{ width: 320, height: 200, radius: 20 }}
-        scaleType="crop"
         alt={restaurant.name}
-        backgroundColor="transparent"
+        style={{
+          width: "100%",
+          aspectRatio: "4 / 3",
+          objectFit: "cover",
+          display: "block",
+        }}
       />
-      {/* 하단 정보 행 — 카드 위에 absolute 로 깔린다. */}
+      {/* 정보 행 — 사진 아래(일반 흐름). 사진을 가리지 않는다. */}
       <div
         style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
           background: colors.white,
-          padding: "8px 20px",
+          padding: "10px 16px",
           display: "flex",
           alignItems: "center",
           gap: 8,

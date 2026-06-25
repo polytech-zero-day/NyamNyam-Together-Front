@@ -11,12 +11,6 @@ import {
 } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { ALCOHOL_OPTIONS, type Alcohol } from "../types";
-import {
-  ALCOHOL_TO_DRINK,
-  foodsToCategories,
-  moodToBackend,
-  useStage1Vote,
-} from "../api";
 import { AlcoholSelectSheet } from "./AlcoholSelectSheet";
 import { BudgetSelectSheet } from "./BudgetSelectSheet";
 import { MoodSelectSheet } from "./MoodSelectSheet";
@@ -34,7 +28,6 @@ const ALCOHOL_LABELS: Record<Alcohol, string> = Object.fromEntries(
 export function PreferenceFormScreen() {
   const { participant, back, goto, sessionId } = useApp();
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const stage1 = useStage1Vote(sessionId ?? "");
 
   const filledCount = [
     participant.alcohol,
@@ -47,23 +40,12 @@ export function PreferenceFormScreen() {
 
   const closeSheet = () => setOpenSheet(null);
 
-  // F-05~08 → 1차 투표(제약 응답) 전송 후 대기 화면으로.
-  async function handleSubmit() {
-    if (!isComplete || stage1.isPending) return;
+  // F-05~08 취향 입력 완료 → 정렬 기준 선택(stage1 마지막 단계)으로. 실제 stage1 전송은
+  // 정렬 선택 후 App 라우터에서 sortPref 와 함께 처리한다.
+  function handleSubmit() {
+    if (!isComplete) return;
     if (!sessionId || participant.alcohol == null || participant.budgetMax == null) return;
-    try {
-      await stage1.mutateAsync({
-        drink: ALCOHOL_TO_DRINK[participant.alcohol],
-        budgetMin: participant.budgetMin,
-        budgetMax: participant.budgetMax,
-        categories: foodsToCategories(participant.foods),
-        mood: moodToBackend(participant.mood),
-      });
-      goto("q-done");
-    } catch (err) {
-      // 실패 시 전역 토스트가 안내. 화면은 q-hub에 머물러 재시도 가능하게 한다.
-      console.error("응답 전송 실패:", err);
-    }
+    goto("sort-select");
   }
 
   return (

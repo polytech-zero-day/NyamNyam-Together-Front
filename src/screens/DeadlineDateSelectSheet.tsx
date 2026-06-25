@@ -75,22 +75,24 @@ export function DeadlineDateSelectSheet({ onClose, onNext }: Props) {
     >
       <div style={{ padding: "8px 24px 16px" }}>
         <Text
-          typography="t5"
-          fontWeight="semibold"
-          color={colors.grey800}
-          style={{ margin: "0 0 8px" }}
+          typography="t6"
+          color={colors.grey500}
+          style={{ display: "block", margin: "0 0 6px" }}
         >
-          {formatKorean(date)}
+          직접 선택 · {formatKorean(date)}
         </Text>
         <input
           type="date"
           value={date}
           min={today}
           onChange={(e) => setDate(e.target.value)}
+          aria-label="마감 날짜 직접 선택"
           style={{
             width: "100%",
+            boxSizing: "border-box", // padding 포함 폭 계산 — 모바일 가로 넘침 방지
             padding: "14px 16px",
-            fontSize: 17,
+            fontSize: 16, // iOS 자동 줌 방지(≥16)
+            textAlign: "left",
             border: "none",
             background: colors.grey100,
             borderRadius: 12,

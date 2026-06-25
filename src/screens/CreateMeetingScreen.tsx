@@ -111,7 +111,7 @@ export function CreateMeetingScreen() {
         />
         <MeetingFieldRow
           icon="👬"
-          label="최소 인원"
+          label="최대 인원"
           value={meeting.minMembers ? `${meeting.minMembers}명` : null}
           onClick={() => setOpenSheet("members")}
         />

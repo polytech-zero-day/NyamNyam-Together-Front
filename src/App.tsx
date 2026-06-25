@@ -2,13 +2,16 @@ import { useEffect, useMemo } from "react";
 import "./App.css";
 import { AppProvider, useApp } from "./store";
 import {
+  ALCOHOL_TO_DRINK,
   SORT_TO_BACKEND,
+  foodsToCategories,
   isNotReady,
+  moodToBackend,
   toRecommendationCards,
   toVoteResults,
   useProgress,
   useRecommendations,
-  useSetSort,
+  useStage1Vote,
   useStage2Vote,
 } from "./api";
 import { openExternal, shareText } from "./lib/appActions";
@@ -61,13 +64,12 @@ const REC_SCREENS = new Set([
 //   → sort-select → vote-candidates(=Vote) → second-vote-waiting → vote-counting
 //   → final-result
 function ScreenRouter() {
-  const { screen, goto, sort, setSort, setVoted, sessionId, role } = useApp();
-  const isHost = role === "host";
+  const { screen, goto, sort, setSort, setVoted, sessionId, participant } =
+    useApp();
 
   // 추천 후보 조회(집계 전이면 NOT_READY 폴링). REC 화면에서만 활성.
-  // 정렬은 호스트만 지정 → 호스트는 자기 선택을 ?sort로 보내고, 참여자는 미전송해
-  // 세션의 sort_mode(호스트가 정한 값)를 그대로 따른다.
-  const recsQuery = useRecommendations(sessionId, isHost ? SORT_TO_BACKEND[sort] : undefined, {
+  // 정렬은 참여자 다수결로 집계돼 session.sort_mode 에 반영되므로 ?sort 는 보내지 않는다.
+  const recsQuery = useRecommendations(sessionId, undefined, {
     enabled: sessionId != null && REC_SCREENS.has(screen),
   });
   const recsData = recsQuery.data;
@@ -93,13 +95,13 @@ function ScreenRouter() {
     enabled: sessionId != null && screen === "q-done",
   });
   const responded = progressQuery.data?.responded ?? 0;
-  // 분모는 목표 인원(현재 참여 인원과 최소 인원 중 큰 값). 호스트는 백엔드 progress 에서 제외됨.
+  // 분모는 정원(현재 참여 인원과 정원 중 큰 값). 호스트도 완전한 참여자로 포함된다.
   const total = Math.max(
     progressQuery.data?.total ?? 0,
     progressQuery.data?.min ?? 0,
   );
 
-  const setSortMut = useSetSort(sessionId ?? "");
+  const stage1 = useStage1Vote(sessionId ?? "");
   const stage2 = useStage2Vote(sessionId ?? "");
 
   // 대기 게이팅: 취향을 보낸 참여자는 q-done 에 머물며, 집계가 끝나(status=voting,
@@ -111,13 +113,12 @@ function ScreenRouter() {
   }, [screen, ready, goto]);
 
   // F-10: 추천이 준비되면 로딩(finding)에서 자동 전환. 완화 발생 시 공지(relaxed) 경유.
-  // 정렬 지정은 호스트만 → 호스트는 sort-select 경유, 참여자는 바로 후보(vote-candidates).
+  // 정렬은 stage1 투표로 이미 결정됨 → 모두 바로 후보(vote-candidates)로.
   useEffect(() => {
     if (screen === "finding" && ready) {
-      if (relaxed) goto("relaxed");
-      else goto(isHost ? "sort-select" : "vote-candidates");
+      goto(relaxed ? "relaxed" : "vote-candidates");
     }
-  }, [screen, ready, relaxed, isHost, goto]);
+  }, [screen, ready, relaxed, goto]);
 
   return (
     <div className="screen-body">
@@ -144,20 +145,35 @@ function ScreenRouter() {
       {/* F-10 추천 로딩(33). 추천이 준비될 때까지 폴링하다가, 준비되면 위 useEffect 가
           정렬 기준 선택(35)으로(완화면 공지 34 경유) 자동 전환한다. */}
       {screen === "finding" && <LoadingScreen />}
-      {/* F-11 조건완화 공지(34). "추천 결과 보기" → 정렬 기준 선택(35). */}
+      {/* F-11 조건완화 공지(34). "추천 결과 보기" → 후보 투표(35). */}
       {screen === "relaxed" && (
-        <RelaxedScreen onConfirm={() => goto(isHost ? "sort-select" : "vote-candidates")} />
+        <RelaxedScreen onConfirm={() => goto("vote-candidates")} />
       )}
+      {/* 정렬 기준 선택 = stage1 마지막 단계(취향 입력 다음). 선택 후 stage1 투표를 전송한다.
+          정렬은 백엔드에서 참여자 다수결로 집계된다. */}
       {screen === "sort-select" && (
         <SortSelectScreen
           onConfirm={async (s) => {
-            try {
-              await setSortMut.mutateAsync({ sortMode: SORT_TO_BACKEND[s] });
-            } catch (err) {
-              console.error("정렬 변경 실패:", err);
-            }
+            if (
+              !sessionId ||
+              participant.alcohol == null ||
+              participant.budgetMax == null
+            )
+              return;
             setSort(s);
-            goto("vote-candidates");
+            try {
+              await stage1.mutateAsync({
+                drink: ALCOHOL_TO_DRINK[participant.alcohol],
+                budgetMin: participant.budgetMin,
+                budgetMax: participant.budgetMax,
+                categories: foodsToCategories(participant.foods),
+                mood: moodToBackend(participant.mood),
+                sortPref: SORT_TO_BACKEND[s],
+              });
+              goto("q-done");
+            } catch (err) {
+              console.error("응답 전송 실패:", err);
+            }
           }}
         />
       )}

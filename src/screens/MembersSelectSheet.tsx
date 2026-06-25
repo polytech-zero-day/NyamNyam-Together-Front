@@ -40,10 +40,12 @@ export function MembersSelectSheet({ onClose }: Props) {
       open
       onClose={onClose}
       portalContainer={getPortalRoot()}
-      header={<BottomSheet.Header>최소 인원</BottomSheet.Header>}
+      header={<BottomSheet.Header>최대 인원</BottomSheet.Header>}
       headerDescription={
         <BottomSheet.HeaderDescription>
-          {isCouple ? "연인 모임은 2명이에요" : "인원은 최소 3명부터 가능해요"}
+          {isCouple
+            ? "연인 모임은 2명이에요"
+            : "정원(호스트 포함)이 차면 투표가 시작돼요"}
         </BottomSheet.HeaderDescription>
       }
       cta={
