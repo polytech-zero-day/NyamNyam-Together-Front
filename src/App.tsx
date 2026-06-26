@@ -66,7 +66,7 @@ const REC_SCREENS = new Set([
 //   → sort-select → vote-candidates(=Vote) → second-vote-waiting → vote-counting
 //   → final-result
 function ScreenRouter() {
-  const { screen, goto, sort, setSort, setVoted, sessionId, participant } =
+  const { screen, goto, sort, setSort, setVoted, sessionId, participant, role } =
     useApp();
 
   const finalize = useFinalize(sessionId ?? "");
@@ -220,12 +220,13 @@ function ScreenRouter() {
       {screen === "vote-counting" && (
         <VoteCountingScreen
           onComplete={async () => {
-            // [버그3 수정] finalize API 호출 후 결과 화면으로 이동.
-            // 동점 시 리더(최다 득표) 자동 선정. 실패해도 결과 화면은 진입.
-            try {
-              await finalize.mutateAsync({});
-            } catch (err) {
-              console.error("finalize 실패:", err);
+            // finalize는 requireToss(호스트 전용) — 참여자는 호출하지 않음.
+            if (role === "host") {
+              try {
+                await finalize.mutateAsync({});
+              } catch (err) {
+                console.error("finalize 실패:", err);
+              }
             }
             goto("final-result");
           }}
