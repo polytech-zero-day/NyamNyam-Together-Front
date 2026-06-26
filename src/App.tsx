@@ -4,11 +4,13 @@ import { AppProvider, useApp } from "./store";
 import {
   ALCOHOL_TO_DRINK,
   SORT_TO_BACKEND,
+  backendToSort,
   foodsToCategories,
   isNotReady,
   moodToBackend,
   toRecommendationCards,
   toVoteResults,
+  useFinalize,
   useProgress,
   useRecommendations,
   useStage1Vote,
@@ -66,6 +68,8 @@ const REC_SCREENS = new Set([
 function ScreenRouter() {
   const { screen, goto, sort, setSort, setVoted, sessionId, participant } =
     useApp();
+
+  const finalize = useFinalize(sessionId ?? "");
 
   // 추천 후보 조회(집계 전이면 NOT_READY 폴링). REC 화면에서만 활성.
   // 정렬은 참여자 다수결로 집계돼 session.sort_mode 에 반영되므로 ?sort 는 보내지 않는다.
@@ -126,6 +130,14 @@ function ScreenRouter() {
     }
   }, [screen, ready, relaxed, goto]);
 
+  // [버그3 수정] stage2 전원 투표 완료 시 vote-counting으로 자동 전환.
+  // AUTO_ADVANCE 타임아웃이 아닌 실제 투표 수 기반으로 게이팅.
+  useEffect(() => {
+    if (screen === "second-vote-waiting" && total > 0 && stage2Voted >= total) {
+      goto("vote-counting");
+    }
+  }, [screen, stage2Voted, total, goto]);
+
   return (
     <div className="screen-body">
       {screen === "intro" && <IntroScreen />}
@@ -185,7 +197,7 @@ function ScreenRouter() {
       )}
       {screen === "vote-candidates" && (
         <VoteScreen
-          sort={sort}
+          sort={recs?.sortMode ? backendToSort(recs.sortMode) : sort}
           restaurants={cards}
           onVote={async (recId) => {
             try {
@@ -206,7 +218,18 @@ function ScreenRouter() {
         />
       )}
       {screen === "vote-counting" && (
-        <VoteCountingScreen onComplete={() => goto("final-result")} />
+        <VoteCountingScreen
+          onComplete={async () => {
+            // [버그3 수정] finalize API 호출 후 결과 화면으로 이동.
+            // 동점 시 리더(최다 득표) 자동 선정. 실패해도 결과 화면은 진입.
+            try {
+              await finalize.mutateAsync({});
+            } catch (err) {
+              console.error("finalize 실패:", err);
+            }
+            goto("final-result");
+          }}
+        />
       )}
       {screen === "final-result" && (
         <FinalResultScreen

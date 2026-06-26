@@ -1,14 +1,11 @@
-import { useEffect } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, Text } from "@toss/tds-mobile";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-14 2차(후보) 투표 후 대기 화면.
 // 참여자가 후보 식당 중 하나를 골라 투표한 직후 — 다른 참여자들이 끝나길 기다리는 상태.
-// 시안에 하단 CTA 없음 (참여자는 액션 없이 대기). 나가려면 네비게이션 바 < 또는 X.
-// 백엔드 연동 시 전원 완료 신호 받으면 자동으로 VoteCountingScreen 으로 전환.
-// 데모는 setTimeout + 화면 탭으로 즉시 진행 가능.
-const AUTO_ADVANCE_MS = 2500;
+// App.tsx의 useEffect가 stage2Voted >= total 시 자동으로 VoteCountingScreen으로 전환한다.
+// (AUTO_ADVANCE 타임아웃 제거 — 실제 투표 완료 기반으로 전환)
 
 interface Props {
   votedCount?: number;
@@ -21,13 +18,8 @@ export function SecondVoteWaitingScreen({
   totalCount = 3,
   onComplete,
 }: Props) {
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (onComplete) onComplete();
-      else console.log("[second-vote-waiting] onComplete 미연결");
-    }, AUTO_ADVANCE_MS);
-    return () => clearTimeout(t);
-  }, [onComplete]);
+  // 전환은 App.tsx의 useEffect(stage2Voted >= total)가 담당.
+  // 이 화면은 순수 대기 UI — onComplete는 App에서 goto로 연결됨.
 
   return (
     <div

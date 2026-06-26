@@ -4,9 +4,8 @@ import { Asset, Text } from "@toss/tds-mobile";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // 전원이 후보 투표를 마쳤고 최종 1위 장소를 집계하는 잠깐의 안내 화면.
-// 참여자 액션 없이 자동으로 FinalResultScreen 으로 전환된다.
-// AllSettledScreen 과 동일 패턴 — 시점/문구만 다름(취향 입력 후 / 후보 투표 후).
-const AUTO_ADVANCE_MS = 1500;
+// App.tsx에서 finalize API 호출 후 onComplete(goto final-result)를 실행한다.
+// 화면 진입 시 onComplete를 즉시 실행해 finalize → 결과 화면으로 넘어간다.
 
 interface Props {
   onComplete?: () => void;
@@ -14,12 +13,10 @@ interface Props {
 
 export function VoteCountingScreen({ onComplete }: Props) {
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (onComplete) onComplete();
-      else console.log("[vote-counting] onComplete 미연결");
-    }, AUTO_ADVANCE_MS);
-    return () => clearTimeout(t);
-  }, [onComplete]);
+    if (onComplete) onComplete();
+  // onComplete는 App.tsx에서 finalize 호출 후 goto("final-result")를 실행하는 async 함수.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
