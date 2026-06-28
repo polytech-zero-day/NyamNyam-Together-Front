@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { colors } from "@toss/tds-colors";
 import {
   Asset,
@@ -8,23 +9,41 @@ import {
   TextField,
   useToast,
 } from "@toss/tds-mobile";
+import { getTossShareLink } from "@apps-in-toss/web-framework";
 import { useApp } from "../store";
+import { isInTossApp } from "../lib/tossEnv";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
-// F-03 모임 생성 완료. 호스트가 만든 모임의 초대 링크(?groupId=sessionId)를 보여주고 공유하도록 유도.
-function buildInviteLink(sessionId: string | null): string {
+// F-03 모임 생성 완료.
+// 토스 앱 안: getTossShareLink로 intoss:// 딥링크 포함 공유 URL 생성
+//   → 카톡 등 외부에서 클릭 시 토스 앱 실행 + 냠냠투게더 바로 진입
+// 토스 앱 밖(dev 등): raw mini app URL 폴백
+function buildFallbackLink(sessionId: string | null): string {
   if (!sessionId) return "";
-  if (typeof window === "undefined") return `?groupId=${sessionId}`;
-  return `${window.location.origin}${window.location.pathname}?groupId=${sessionId}`;
+  return `https://kopo-recommend-location.private-apps.tossmini.com/?groupId=${sessionId}`;
 }
 
 export function InviteGeneratedScreen() {
   const { goto, back, sessionId } = useApp();
   const { openToast } = useToast();
-  const inviteLink = buildInviteLink(sessionId);
+  const [inviteLink, setInviteLink] = useState(buildFallbackLink(sessionId));
+  const [linkReady, setLinkReady] = useState(!isInTossApp());
+
+  useEffect(() => {
+    if (!sessionId || !isInTossApp()) return;
+    const deepLinkPath = `intoss://kopo-recommend-location?groupId=${encodeURIComponent(sessionId)}`;
+    getTossShareLink(deepLinkPath)
+      .then((tossLink) => {
+        setInviteLink(tossLink);
+        setLinkReady(true);
+      })
+      .catch(() => {
+        setLinkReady(true); // 실패 시 폴백 URL 유지
+      });
+  }, [sessionId]);
 
   function handleCopy() {
-    if (!inviteLink) return;
+    if (!inviteLink || !linkReady) return;
     // 웹뷰/브라우저 양쪽에서 동작. 복사 성공 시에만 TDS 토스트로 피드백.
     if (typeof navigator === "undefined" || navigator.clipboard == null) {
       // 클립보드 미지원 환경 — 데모 흐름은 막지 않고 토스트만 생략.
@@ -102,6 +121,7 @@ export function InviteGeneratedScreen() {
                 variant="clear"
                 iconSize={20}
                 onClick={handleCopy}
+                disabled={!linkReady}
               />
             }
           />
