@@ -9,24 +9,30 @@ import type {
   RecommendationItemDTO,
 } from "./dto";
 
-// 카테고리별 placeholder SVG (이모지 + 배경색) — 구글 사진 없을 때 일관된 카테고리 이미지 표시
-function categoryPlaceholder(category: string | null): string {
-  const map: Record<string, { emoji: string; bg: string }> = {
-    한식:      { emoji: "🍚", bg: "#FF8A65" },
-    일식:      { emoji: "🍱", bg: "#66BB6A" },
-    양식:      { emoji: "🍝", bg: "#42A5F5" },
-    중식:      { emoji: "🥟", bg: "#EF5350" },
-    분식:      { emoji: "🍜", bg: "#FFA726" },
-    아시안:    { emoji: "🍜", bg: "#26C6DA" },
-    "고기·구이": { emoji: "🥩", bg: "#8D6E63" },
-    "카페·브런치": { emoji: "☕", bg: "#A1887F" },
-    술집:      { emoji: "🍺", bg: "#78909C" },
-    "술·식사":  { emoji: "🍻", bg: "#7E57C2" },
-  };
-  const key = category ?? "";
-  const { emoji, bg } = map[key] ?? { emoji: "🍽️", bg: "#BDBDBD" };
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280" viewBox="0 0 400 280"><rect width="400" height="280" fill="${bg}"/><text x="200" y="160" text-anchor="middle" dominant-baseline="middle" font-size="96">${emoji}</text></svg>`;
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+// 카테고리별 대표 음식 이미지 — 구글 사진 없을 때 사용
+import imgKorean   from "../assets/category/korean.jpg";
+import imgJapanese from "../assets/category/japanese.jpg";
+import imgWestern  from "../assets/category/western.jpg";
+import imgChinese  from "../assets/category/chinese.jpg";
+import imgBunsik   from "../assets/category/bunsik.jpg";
+import imgAsian    from "../assets/category/asian.jpg";
+import imgBbq      from "../assets/category/bbq.jpg";
+import imgCafe     from "../assets/category/cafe.jpg";
+import imgDefault  from "../assets/category/default.jpg";
+
+const CATEGORY_IMAGE: Record<string, string> = {
+  "한식":        imgKorean,
+  "일식":        imgJapanese,
+  "양식":        imgWestern,
+  "중식":        imgChinese,
+  "분식":        imgBunsik,
+  "아시안":      imgAsian,
+  "고기·구이":   imgBbq,
+  "카페·브런치": imgCafe,
+};
+
+function categoryImage(category: string | null): string {
+  return CATEGORY_IMAGE[category ?? ""] ?? imgDefault;
 }
 
 // ───────────── enum 매핑 (프론트 → 백엔드) ─────────────
@@ -97,8 +103,8 @@ export function toRecommendationCard(dto: RecommendationItemDTO, index: number):
 
     rating: dto.rating ?? 0,
     userRatingCount: dto.reviewCount ?? 0,
-    // 라이브 구글 사진 우선, 없으면 목업 placeholder 순환.
-    imageUrl: dto.imageUrl ?? categoryPlaceholder(dto.category ?? categoryLabel(dto.placeType)),
+    // 라이브 구글 사진 우선, 없으면 카테고리별 대표 이미지.
+    imageUrl: dto.imageUrl ?? categoryImage(dto.category ?? categoryLabel(dto.placeType)),
     recId: dto.recId,
     placeId: dto.placeId,
     rank: dto.rank,
