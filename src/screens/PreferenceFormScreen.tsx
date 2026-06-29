@@ -107,24 +107,24 @@ export function PreferenceFormScreen() {
         />
       </List>
 
-      {/* 시안: 미완료 = 이전 | 저장(비활성), 4개 다 채우면(30) 단일 "투표하기"로 전환. */}
+      {/* 이전 | 저장(비활성) → 이전 | 투표하기(활성) — DOM 구조 유지해 깜빡임 방지 */}
       <div style={{ marginTop: "auto" }}>
-        {isComplete ? (
-          <BottomCTA.Single onClick={handleSubmit}>투표하기</BottomCTA.Single>
-        ) : (
-          <BottomCTA.Double
-            leftButton={
-              <CTAButton color="dark" variant="weak" onClick={back}>
-                이전
-              </CTAButton>
-            }
-            rightButton={
-              <CTAButton color="primary" disabled>
-                저장
-              </CTAButton>
-            }
-          />
-        )}
+        <BottomCTA.Double
+          leftButton={
+            <CTAButton color="dark" variant="weak" onClick={back}>
+              이전
+            </CTAButton>
+          }
+          rightButton={
+            <CTAButton
+              color="primary"
+              disabled={!isComplete}
+              onClick={handleSubmit}
+            >
+              {isComplete ? "투표하기" : "저장"}
+            </CTAButton>
+          }
+        />
       </div>
 
       {/* 시트 overlay — 호스트 CreateMeetingScreen 과 동일한 패턴.
