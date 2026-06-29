@@ -9,12 +9,25 @@ import type {
   RecommendationItemDTO,
 } from "./dto";
 
-import placeholder1 from "../assets/restaurant-1.png";
-import placeholder2 from "../assets/restaurant-2.png";
-import placeholder3 from "../assets/restaurant-3.png";
-
-// 구글 사진은 ToS상 수집/저장하지 않으므로(추천 응답에 이미지 없음) 카드 이미지는 목업 placeholder를 순환 사용.
-const PLACEHOLDERS = [placeholder1, placeholder2, placeholder3];
+// 카테고리별 placeholder SVG (이모지 + 배경색) — 구글 사진 없을 때 일관된 카테고리 이미지 표시
+function categoryPlaceholder(category: string | null): string {
+  const map: Record<string, { emoji: string; bg: string }> = {
+    한식:      { emoji: "🍚", bg: "#FF8A65" },
+    일식:      { emoji: "🍱", bg: "#66BB6A" },
+    양식:      { emoji: "🍝", bg: "#42A5F5" },
+    중식:      { emoji: "🥟", bg: "#EF5350" },
+    분식:      { emoji: "🍜", bg: "#FFA726" },
+    아시안:    { emoji: "🍜", bg: "#26C6DA" },
+    "고기·구이": { emoji: "🥩", bg: "#8D6E63" },
+    "카페·브런치": { emoji: "☕", bg: "#A1887F" },
+    술집:      { emoji: "🍺", bg: "#78909C" },
+    "술·식사":  { emoji: "🍻", bg: "#7E57C2" },
+  };
+  const key = category ?? "";
+  const { emoji, bg } = map[key] ?? { emoji: "🍽️", bg: "#BDBDBD" };
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="280" viewBox="0 0 400 280"><rect width="400" height="280" fill="${bg}"/><text x="200" y="160" text-anchor="middle" dominant-baseline="middle" font-size="96">${emoji}</text></svg>`;
+  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+}
 
 // ───────────── enum 매핑 (프론트 → 백엔드) ─────────────
 export const ALCOHOL_TO_DRINK: Record<Alcohol, BackendDrink> = {
@@ -85,7 +98,7 @@ export function toRecommendationCard(dto: RecommendationItemDTO, index: number):
     rating: dto.rating ?? 0,
     userRatingCount: dto.reviewCount ?? 0,
     // 라이브 구글 사진 우선, 없으면 목업 placeholder 순환.
-    imageUrl: dto.imageUrl ?? PLACEHOLDERS[index % PLACEHOLDERS.length],
+    imageUrl: dto.imageUrl ?? categoryPlaceholder(dto.category ?? categoryLabel(dto.placeType)),
     recId: dto.recId,
     placeId: dto.placeId,
     rank: dto.rank,
