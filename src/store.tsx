@@ -101,10 +101,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const goto = useCallback(
     (s: ScreenId) => {
-      setHistory((h) => [...h, screen]);
-      setScreen(s);
+      setScreen((prev) => {
+        setHistory((h) => [...h, prev]);
+        return s;
+      });
     },
-    [screen],
+    [],
   );
 
   const back = useCallback(() => {

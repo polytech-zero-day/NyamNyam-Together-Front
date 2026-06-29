@@ -10,13 +10,14 @@ import {
 import { useEffect, useState } from "react";
 import { useApp } from "../store";
 import { useCloseSession, useProgress, useSession } from "../api";
+import { showToast } from "../lib/toast";
 import { compactDeadline } from "../lib/format";
 import womanIcon from "../assets/woman-fill-circle.svg";
 
 // F-13 투표 정보(진행중). 모임의 모든 설정값과 현재 투표 진행 상황을 한 화면에 표시.
 // 투표 인원은 GET /progress 폴링, 남은 시간은 session.deadline 카운트다운, 강제종료는 POST /close.
 // (호스트 이름은 백엔드에 없어 placeholder 유지)
-const HOST_NAME = "김토스";
+const HOST_NAME = "호스트";
 
 // deadline(ISO) → 남은 시간 "HH:MM:SS". 없으면 "--:--:--", 지났으면 00:00:00.
 function formatRemaining(deadlineIso: string | null | undefined, nowMs: number): string {
@@ -59,6 +60,7 @@ export function VoteInfoActiveScreen() {
       goto("finding");
     } catch (err) {
       console.error("투표 종료 실패:", err);
+      showToast("투표 종료에 실패했어요. 다시 시도해주세요.", "error");
     }
   }
 

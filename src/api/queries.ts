@@ -127,7 +127,7 @@ export function useStage2Vote(sessionId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (req: Stage2VoteRequest) => votesApi.stage2(sessionId, req),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["recommendations", sessionId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recommendations(sessionId) }),
   });
 }
 
@@ -135,7 +135,7 @@ export function useSetSort(sessionId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (req: SetSortRequest) => recommendationsApi.setSort(sessionId, req),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["recommendations", sessionId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recommendations(sessionId) }),
   });
 }
 

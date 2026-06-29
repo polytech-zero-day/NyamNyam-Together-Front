@@ -2,6 +2,7 @@ import { colors } from "@toss/tds-colors";
 import { Asset, BottomCTA, CTAButton, Text } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { useCloseSession, useProgress } from "../api";
+import { showToast } from "../lib/toast";
 import checkFillIcon from "../assets/check-fill-circle.svg";
 
 // F-13/F-14 투표 대기 화면. 호스트가 "투표 현황보기"로 진입했을 때 보는 진행 상황.
@@ -14,7 +15,10 @@ export function VoteWaitingScreen() {
   const respondedCount = progress.data?.responded ?? 0;
   // 분모는 '목표 인원'(현재 참여 인원과 최소 인원 중 큰 값) — 호스트만 있을 때 1/N 처럼
   // 최소 인원보다 작게 보여 혼란을 주지 않도록 한다.
-  const totalCount = Math.max(progress.data?.total ?? 0, meeting.minMembers ?? 0);
+  const totalCount = Math.max(
+    progress.data?.total ?? 0,
+    progress.data?.min ?? meeting.minMembers ?? 0,
+  );
 
   async function handleForceClose() {
     if (close.isPending) return;
@@ -24,6 +28,7 @@ export function VoteWaitingScreen() {
       goto("finding");
     } catch (err) {
       console.error("투표 종료 실패:", err);
+      showToast("투표 종료에 실패했어요. 다시 시도해주세요.", "error");
     }
   }
 

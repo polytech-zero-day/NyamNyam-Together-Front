@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, Text } from "@toss/tds-mobile";
 import checkFillIcon from "../assets/check-fill-circle.svg";
@@ -12,15 +12,17 @@ interface Props {
 }
 
 export function VoteCountingScreen({ onComplete }: Props) {
+  const called = useRef(false);
   useEffect(() => {
-    if (onComplete) onComplete();
-  // onComplete는 App.tsx에서 finalize 호출 후 goto("final-result")를 실행하는 async 함수.
+    if (onComplete && !called.current) {
+      called.current = true;
+      onComplete();
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div
-      onClick={onComplete}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -31,7 +33,7 @@ export function VoteCountingScreen({ onComplete }: Props) {
         padding: "0 24px",
         gap: 16,
         background: "#fff",
-        cursor: onComplete ? "pointer" : "default",
+        cursor: "default",
       }}
     >
       <Asset.Image

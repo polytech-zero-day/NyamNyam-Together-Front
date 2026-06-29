@@ -48,7 +48,7 @@ const REC_SCREENS = new Set([
   "relaxed",
   "sort-select",
   "vote-candidates",
-  "second-vote-waiting",
+  // second-vote-waiting: 득표수 갱신 불필요, useProgress만으로 충분
   "vote-counting",
   "final-result",
 ]);
@@ -202,11 +202,11 @@ function ScreenRouter() {
           onVote={async (recId) => {
             try {
               await stage2.mutateAsync({ restaurantId: recId });
+              setVoted(recId);
+              goto("second-vote-waiting");
             } catch (err) {
               console.error("투표 실패:", err);
             }
-            setVoted(recId);
-            goto("second-vote-waiting");
           }}
         />
       )}

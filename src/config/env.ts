@@ -15,6 +15,7 @@ export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ?? "";
 /** fetch 타임아웃(ms). */
 export const API_TIMEOUT_MS = Number(import.meta.env.VITE_API_TIMEOUT_MS ?? 10_000);
 
-/** 토스 appLogin 실패 시 /auth/dev-login 으로 우회할지(개발 편의, 기본 허용). */
+/** 토스 appLogin 실패 시 /auth/dev-login 으로 우회할지(개발 편의).
+ *  배포 환경에서는 반드시 VITE_ENABLE_DEV_LOGIN=false 로 설정해야 한다. */
 export const ENABLE_DEV_LOGIN_FALLBACK =
-  (import.meta.env.VITE_ENABLE_DEV_LOGIN ?? "true") === "true";
+  (import.meta.env.VITE_ENABLE_DEV_LOGIN ?? "false") === "true";

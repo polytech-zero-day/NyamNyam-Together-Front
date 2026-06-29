@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Asset, BottomCTA, Stepper, StepperRow, Top } from "@toss/tds-mobile";
 import { useApp } from "../store";
 import { ApiError, ensureParticipantToken, useJoinSession } from "../api";
+import { showToast } from "../lib/toast";
 
 // F-04 참여자 인트로. 초대 링크로 들어온 참여자에게 흐름을 안내한다.
 // "투표하기" → 익명 토큰 확보 + 세션 join → PreferenceFormScreen(취향 입력).
@@ -26,8 +27,8 @@ export function ParticipantIntroScreen() {
       }
       goto("q-hub");
     } catch (err) {
-      // 실패 시 전역 토스트가 안내. 입장 실패면 진행하지 않고 머문다(재시도 가능).
       console.error("참여 처리 실패:", err);
+      showToast("입장에 실패했어요. 다시 시도해주세요.", "error");
     } finally {
       setBusy(false);
     }

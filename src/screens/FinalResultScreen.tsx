@@ -113,7 +113,7 @@ export function FinalResultScreen({
             color={colors.grey700}
             bgColor="transparent"
             onClick={() => {
-              if (first && onShowMap) onShowMap(first.restaurant.id);
+              if (first && onShowMap) onShowMap(first.recId ?? first.restaurant.id);
               else console.log("[final-result] 지도 보기 (미연결)");
             }}
           />

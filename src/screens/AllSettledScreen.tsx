@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, Text } from "@toss/tds-mobile";
 import checkFillIcon from "../assets/check-fill-circle.svg";
@@ -13,17 +13,24 @@ interface Props {
 }
 
 export function AllSettledScreen({ onComplete }: Props) {
+  const called = useRef(false);
+
+  function safeComplete() {
+    if (called.current) return;
+    called.current = true;
+    if (onComplete) onComplete();
+    else console.log("[all-settled] onComplete 미연결");
+  }
+
   useEffect(() => {
-    const t = setTimeout(() => {
-      if (onComplete) onComplete();
-      else console.log("[all-settled] onComplete 미연결");
-    }, AUTO_ADVANCE_MS);
+    const t = setTimeout(safeComplete, AUTO_ADVANCE_MS);
     return () => clearTimeout(t);
-  }, [onComplete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
-      onClick={onComplete}
+      onClick={safeComplete}
       style={{
         display: "flex",
         flexDirection: "column",
