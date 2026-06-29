@@ -1,6 +1,6 @@
 import { colors } from "@toss/tds-colors";
 import { Asset, Button, IconButton, Text, Top } from "@toss/tds-mobile";
-import { DUMMY_VOTE_RESULTS, type VoteResult } from "../data/dummy-vote-results";
+import type { VoteResult } from "../data/dummy-vote-results";
 import { BRAND_ORANGE } from "../components/icons";
 
 // F-13(투표 결과, 시안 41). 최다 득표 식당 1위 부상, 2·3위는 보조 표시.
@@ -15,10 +15,28 @@ interface Props {
 }
 
 export function FinalResultScreen({
-  results = DUMMY_VOTE_RESULTS,
+  results = [],
   onShare,
   onShowMap,
 }: Props) {
+  if (results.length === 0) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          background: colors.white,
+        }}
+      >
+        <Text typography="t5" color={colors.grey400}>
+          결과를 불러오는 중…
+        </Text>
+      </div>
+    );
+  }
+
   const first = results.find((r) => r.rank === 1);
   const others = results
     .filter((r) => r.rank !== 1)

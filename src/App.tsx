@@ -1,13 +1,17 @@
 import { useEffect, useMemo } from "react";
 import "./App.css";
 import { AppProvider, useApp } from "./store";
+import { useQuery } from "@tanstack/react-query";
 import {
   ALCOHOL_TO_DRINK,
   SORT_TO_BACKEND,
+  ApiError,
   backendToSort,
   foodsToCategories,
   isNotReady,
   moodToBackend,
+  queryKeys,
+  sessionsApi,
   toRecommendationCards,
   toVoteResults,
   useFinalize,
@@ -101,7 +105,7 @@ function ScreenRouter() {
       (screen === "q-done" || screen === "second-vote-waiting"),
   });
   const responded = progressQuery.data?.responded ?? 0;
-  // 분모는 정원(현재 참여 인원과 정원 중 큰 값). 호스트도 완전한 참여자로 포함된다.
+  // q-done 분모: 정원(현재 참여 인원과 정원 중 큰 값).
   const total = Math.max(
     progressQuery.data?.total ?? 0,
     progressQuery.data?.min ?? 0,
@@ -110,6 +114,14 @@ function ScreenRouter() {
   const stage2Voted = recs
     ? recs.recommendations.reduce((s, r) => s + (r.voteCount ?? 0), 0)
     : 0;
+
+  // vote-counting 화면에서 참여자용 세션 상태 폴링 — finalize 완료(status=closed) 감지.
+  const { data: voteCountingSession } = useQuery({
+    queryKey: [...queryKeys.session(sessionId ?? ""), "live"],
+    queryFn: () => sessionsApi.get(sessionId!),
+    enabled: sessionId != null && screen === "vote-counting" && role === "participant",
+    refetchInterval: 2_000,
+  });
 
   const stage1 = useStage1Vote(sessionId ?? "");
   const stage2 = useStage2Vote(sessionId ?? "");
@@ -130,13 +142,24 @@ function ScreenRouter() {
     }
   }, [screen, ready, relaxed, goto]);
 
-  // [버그3 수정] stage2 전원 투표 완료 시 vote-counting으로 자동 전환.
-  // AUTO_ADVANCE 타임아웃이 아닌 실제 투표 수 기반으로 게이팅.
+  // stage2 전원 투표 완료 시 vote-counting으로 자동 전환.
+  // 분모는 stage1 실제 제출 인원(responded) — voting 중 뒤늦게 join한 사람 제외.
   useEffect(() => {
-    if (screen === "second-vote-waiting" && total > 0 && stage2Voted >= total) {
+    if (screen === "second-vote-waiting" && responded > 0 && stage2Voted >= responded) {
       goto("vote-counting");
     }
-  }, [screen, stage2Voted, total, goto]);
+  }, [screen, stage2Voted, responded, goto]);
+
+  // 참여자: vote-counting 화면에서 session.status=closed 감지 시 결과 화면으로.
+  useEffect(() => {
+    if (
+      screen === "vote-counting" &&
+      role === "participant" &&
+      voteCountingSession?.status === "closed"
+    ) {
+      goto("final-result");
+    }
+  }, [screen, role, voteCountingSession?.status, goto]);
 
   return (
     <div className="screen-body">
@@ -213,22 +236,29 @@ function ScreenRouter() {
       {screen === "second-vote-waiting" && (
         <SecondVoteWaitingScreen
           votedCount={stage2Voted}
-          totalCount={total}
+          totalCount={responded}
           onComplete={() => goto("vote-counting")}
         />
       )}
       {screen === "vote-counting" && (
         <VoteCountingScreen
           onComplete={async () => {
-            // finalize는 requireToss(호스트 전용) — 참여자는 호출하지 않음.
+            // finalize는 requireToss(호스트 전용).
+            // 참여자는 voteCountingSession 폴링(useEffect)이 closed 감지 후 전환.
             if (role === "host") {
               try {
                 await finalize.mutateAsync({});
+                goto("final-result");
               } catch (err) {
+                const code = err instanceof ApiError ? err.code : "";
+                if (code === "INVALID_STATUS") {
+                  // 이미 closed 상태 — 결과로 이동
+                  goto("final-result");
+                }
+                // 그 외 에러: 세션 상태 폴링이 closed 감지 시 자동 전환됨
                 console.error("finalize 실패:", err);
               }
             }
-            goto("final-result");
           }}
         />
       )}

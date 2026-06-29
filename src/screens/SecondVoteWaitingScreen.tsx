@@ -23,7 +23,6 @@ export function SecondVoteWaitingScreen({
 
   return (
     <div
-      onClick={onComplete}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -34,7 +33,6 @@ export function SecondVoteWaitingScreen({
         padding: "0 24px",
         gap: 16,
         background: "#fff",
-        cursor: onComplete ? "pointer" : "default",
       }}
     >
       <Asset.Image
