@@ -122,6 +122,7 @@ export function FoodSelectScreen() {
                 gap: 6,
                 cursor: isCapReached ? "not-allowed" : "pointer",
                 opacity: isCapReached ? 0.4 : 1,
+                transition: "opacity 0.15s, background 0.1s",
               }}
             >
               <span style={{ fontSize: 24, lineHeight: 1 }}>
