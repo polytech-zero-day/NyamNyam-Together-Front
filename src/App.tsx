@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import "./App.css";
 import { AppProvider, useApp } from "./store";
 import { useQuery } from "@tanstack/react-query";
@@ -52,7 +52,7 @@ const REC_SCREENS = new Set([
   "relaxed",
   "sort-select",
   "vote-candidates",
-  // second-vote-waiting: 득표수 갱신 불필요, useProgress만으로 충분
+  "second-vote-waiting", // stage2 득표수 폴링 — stage2Voted >= responded 전환 조건에 필요
   "vote-counting",
   "final-result",
 ]);
@@ -85,13 +85,31 @@ function ScreenRouter() {
   const ready = recs != null;
   const relaxed = recs?.relaxed ?? false;
 
+  // imageUrl 캐시: 재조회 시 fetchPhotoUri 타임아웃으로 imageUrl=null이 되면
+  // 이전에 성공한 URL을 재사용해 "4장 모두 같은 사진" 현상 방지.
+  const imageUrlCache = useRef(new Map<string, string>());
+  const patchedRecs = useMemo(() => {
+    if (!recs) return null;
+    return {
+      ...recs,
+      recommendations: recs.recommendations.map((r) => {
+        if (r.imageUrl) {
+          imageUrlCache.current.set(r.recId, r.imageUrl);
+          return r;
+        }
+        const cached = imageUrlCache.current.get(r.recId);
+        return cached ? { ...r, imageUrl: cached } : r;
+      }),
+    };
+  }, [recs]);
+
   const cards = useMemo(
-    () => (recs ? toRecommendationCards(recs.recommendations) : []),
-    [recs],
+    () => (patchedRecs ? toRecommendationCards(patchedRecs.recommendations) : []),
+    [patchedRecs],
   );
   const voteResults = useMemo(
-    () => (recs ? toVoteResults(recs.recommendations) : []),
-    [recs],
+    () => (patchedRecs ? toVoteResults(patchedRecs.recommendations) : []),
+    [patchedRecs],
   );
   const mapUrlByRec = useMemo(
     () => new Map(cards.map((c) => [c.recId, c.mapUrl])),
@@ -115,11 +133,12 @@ function ScreenRouter() {
     ? recs.recommendations.reduce((s, r) => s + (r.voteCount ?? 0), 0)
     : 0;
 
-  // vote-counting 화면에서 참여자용 세션 상태 폴링 — finalize 완료(status=closed) 감지.
+  // vote-counting 화면에서 세션 상태 폴링 — finalize 완료(status=closed) 감지.
+  // 호스트: finalize 실패 시 fallback. 참여자: 호스트 finalize 완료 감지.
   const { data: voteCountingSession } = useQuery({
     queryKey: [...queryKeys.session(sessionId ?? ""), "live"],
     queryFn: () => sessionsApi.get(sessionId!),
-    enabled: sessionId != null && screen === "vote-counting" && role === "participant",
+    enabled: sessionId != null && screen === "vote-counting",
     refetchInterval: 2_000,
   });
 
@@ -150,16 +169,13 @@ function ScreenRouter() {
     }
   }, [screen, stage2Voted, responded, goto]);
 
-  // 참여자: vote-counting 화면에서 session.status=closed 감지 시 결과 화면으로.
+  // vote-counting 화면에서 session.status=closed 감지 시 결과 화면으로.
+  // 호스트: finalize 실패 fallback / 참여자: 호스트 finalize 완료 감지.
   useEffect(() => {
-    if (
-      screen === "vote-counting" &&
-      role === "participant" &&
-      voteCountingSession?.status === "closed"
-    ) {
+    if (screen === "vote-counting" && voteCountingSession?.status === "closed") {
       goto("final-result");
     }
-  }, [screen, role, voteCountingSession?.status, goto]);
+  }, [screen, voteCountingSession?.status, goto]);
 
   return (
     <div className="screen-body">
