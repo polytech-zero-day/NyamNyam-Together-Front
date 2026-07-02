@@ -2,9 +2,22 @@ import { useApp } from "../store";
 import { closeApp } from "../lib/appActions";
 import { AppLogoMark } from "./icons";
 
+// 뒤로가기 금지 화면: 서버 상태가 이미 앞서 나가 되돌아가면 상태머신이 어긋나는 곳들.
+// (대기·집계·결과 화면에서 back → 재제출 409 루프, 끝난 투표 재진입 등 방지)
+const NO_BACK_SCREENS = new Set([
+  "intro",
+  "q-done",
+  "all-done",
+  "finding",
+  "relaxed",
+  "second-vote-waiting",
+  "vote-counting",
+  "final-result",
+]);
+
 export function NavBar() {
   const { back, screen } = useApp();
-  const canBack = screen !== "intro";
+  const canBack = !NO_BACK_SCREENS.has(screen);
 
   return (
     <header

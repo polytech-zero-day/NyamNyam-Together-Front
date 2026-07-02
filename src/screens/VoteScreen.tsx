@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { colors } from "@toss/tds-colors";
 import { Asset, BottomCTA, Text, Top } from "@toss/tds-mobile";
 import { SORT_OPTIONS, type Restaurant, type SortOrder } from "../types";
@@ -16,25 +16,6 @@ interface Props {
   onVote?: (restaurantId: string) => void;
 }
 
-// 목업 정렬: 선택 기준에 따라 순서만 다르게.
-//   · reviews → 리뷰수(userRatingCount) 내림차순
-//   · rating  → 평점(rating) 내림차순
-//   · random  → id 해시 기반 고정 셔플(새로고침해도 순서 불변 — CLAUDE.md 3.6)
-// 실제 정렬/압축은 추천엔진(백엔드)이 수행한다. 여기는 화면 확인용.
-function sortRestaurants(list: Restaurant[], sort: SortOrder): Restaurant[] {
-  const copy = [...list];
-  if (sort === "rating") {
-    return copy.sort((a, b) => b.rating - a.rating);
-  }
-  if (sort === "random") {
-    const hash = (s: string) =>
-      [...s].reduce((acc, ch) => (acc * 31 + ch.charCodeAt(0)) >>> 0, 7);
-    return copy.sort((a, b) => hash(a.id) - hash(b.id));
-  }
-  // 기본: 리뷰순
-  return copy.sort((a, b) => b.userRatingCount - a.userRatingCount);
-}
-
 export function VoteScreen({
   sort,
   restaurants = DUMMY_RESTAURANTS,
@@ -43,10 +24,9 @@ export function VoteScreen({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const sortLabel =
     SORT_OPTIONS.find((o) => o.id === sort)?.label ?? "리뷰 많은 순";
-  const sorted = useMemo(
-    () => sortRestaurants(restaurants, sort),
-    [restaurants, sort],
-  );
+  // 정렬은 백엔드가 세션 sort_mode(다수결)로 이미 적용해 내려준다 — 순서 그대로 사용.
+  // (클라이언트 재정렬은 백엔드 tie-break·random seed와 어긋나 참가자별 순서가 달라진다.)
+  const sorted = restaurants;
 
   return (
     <div

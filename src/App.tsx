@@ -177,6 +177,36 @@ function ScreenRouter() {
     }
   }, [screen, voteCountingSession?.status, goto]);
 
+  // finalize 시도(호스트 전용) — 4초 스로틀. 최초 시도가 네트워크 오류 등으로 실패해도
+  // 세션 폴링이 voting 상태를 알려줄 때마다 재시도해, 세션이 voting에 영구히 갇히지 않게 한다.
+  const finalizeAttemptAt = useRef(0);
+  const tryFinalize = async () => {
+    if (role !== "host" || finalize.isPending) return;
+    const now = Date.now();
+    if (now - finalizeAttemptAt.current < 4_000) return;
+    finalizeAttemptAt.current = now;
+    try {
+      await finalize.mutateAsync({});
+      goto("final-result");
+    } catch (err) {
+      const code = err instanceof ApiError ? err.code : "";
+      if (code === "INVALID_STATUS") {
+        // 이미 closed 상태 — 결과로 이동
+        goto("final-result");
+      } else {
+        // 그 외 에러: 다음 폴링 틱에서 재시도
+        console.error("finalize 실패:", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (screen === "vote-counting" && voteCountingSession?.status === "voting") {
+      void tryFinalize();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, voteCountingSession]);
+
   return (
     <div className="screen-body">
       {screen === "intro" && <IntroScreen />}
@@ -217,6 +247,7 @@ function ScreenRouter() {
               participant.budgetMax == null
             )
               return;
+            if (stage1.isPending) return; // 더블탭 중복 전송 방지
             setSort(s);
             try {
               await stage1.mutateAsync({
@@ -229,6 +260,11 @@ function ScreenRouter() {
               });
               goto("q-done");
             } catch (err) {
+              // 이미 응답한 경우(새로고침 후 재제출 등)는 성공으로 간주하고 대기 화면으로.
+              if (err instanceof ApiError && err.code === "ALREADY_VOTED") {
+                goto("q-done");
+                return;
+              }
               console.error("응답 전송 실패:", err);
             }
           }}
@@ -239,11 +275,18 @@ function ScreenRouter() {
           sort={recs?.sortMode ? backendToSort(recs.sortMode) : sort}
           restaurants={cards}
           onVote={async (recId) => {
+            if (stage2.isPending) return; // 더블탭 중복 전송 방지
             try {
               await stage2.mutateAsync({ restaurantId: recId });
               setVoted(recId);
               goto("second-vote-waiting");
             } catch (err) {
+              // 이미 투표한 경우(뒤로가기 후 재투표 등)는 성공으로 간주하고 대기 화면으로.
+              if (err instanceof ApiError && err.code === "ALREADY_VOTED") {
+                setVoted(recId);
+                goto("second-vote-waiting");
+                return;
+              }
               console.error("투표 실패:", err);
             }
           }}
@@ -258,23 +301,10 @@ function ScreenRouter() {
       )}
       {screen === "vote-counting" && (
         <VoteCountingScreen
-          onComplete={async () => {
-            // finalize는 requireToss(호스트 전용).
+          onComplete={() => {
+            // finalize는 requireToss(호스트 전용) — tryFinalize가 재시도까지 담당.
             // 참여자는 voteCountingSession 폴링(useEffect)이 closed 감지 후 전환.
-            if (role === "host") {
-              try {
-                await finalize.mutateAsync({});
-                goto("final-result");
-              } catch (err) {
-                const code = err instanceof ApiError ? err.code : "";
-                if (code === "INVALID_STATUS") {
-                  // 이미 closed 상태 — 결과로 이동
-                  goto("final-result");
-                }
-                // 그 외 에러: 세션 상태 폴링이 closed 감지 시 자동 전환됨
-                console.error("finalize 실패:", err);
-              }
-            }
+            void tryFinalize();
           }}
         />
       )}
