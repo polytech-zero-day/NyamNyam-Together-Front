@@ -10,16 +10,13 @@ import checkFillIcon from "../assets/check-fill-circle.svg";
 interface Props {
   votedCount?: number;
   totalCount?: number;
-  onComplete?: () => void;
 }
 
 export function SecondVoteWaitingScreen({
   votedCount = 1,
   totalCount = 3,
-  onComplete,
 }: Props) {
-  // 전환은 App.tsx의 useEffect(stage2Voted >= total)가 담당.
-  // 이 화면은 순수 대기 UI — onComplete는 App에서 goto로 연결됨.
+  // 전환은 App.tsx의 useEffect(stage2Voted >= total)가 담당. 이 화면은 순수 대기 UI.
 
   return (
     <div

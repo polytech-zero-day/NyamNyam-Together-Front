@@ -296,7 +296,6 @@ function ScreenRouter() {
         <SecondVoteWaitingScreen
           votedCount={stage2Voted}
           totalCount={responded}
-          onComplete={() => goto("vote-counting")}
         />
       )}
       {screen === "vote-counting" && (

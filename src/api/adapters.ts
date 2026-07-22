@@ -95,7 +95,7 @@ export interface RecommendationCard extends Restaurant {
   poweredByGoogle: boolean;
 }
 
-export function toRecommendationCard(dto: RecommendationItemDTO, index: number): RecommendationCard {
+export function toRecommendationCard(dto: RecommendationItemDTO): RecommendationCard {
   return {
     id: dto.recId, // 2차 투표(restaurantId)는 recId 기준
     name: dto.name ?? "이름 미확인",
@@ -120,12 +120,12 @@ export function toRecommendationCard(dto: RecommendationItemDTO, index: number):
 }
 
 export function toRecommendationCards(items: RecommendationItemDTO[]): RecommendationCard[] {
-  return items.map((dto, i) => toRecommendationCard(dto, i));
+  return items.map((dto) => toRecommendationCard(dto));
 }
 
 /** 최종 결과(VoteResult[]) — 득표수 내림차순으로 rank 부여(동점은 추천 rank 보조). */
 export function toVoteResults(items: RecommendationItemDTO[]): VoteResult[] {
-  const enriched = items.map((dto, i) => ({ dto, card: toRecommendationCard(dto, i) }));
+  const enriched = items.map((dto) => ({ dto, card: toRecommendationCard(dto) }));
   enriched.sort((a, b) => b.dto.voteCount - a.dto.voteCount || a.dto.rank - b.dto.rank);
   return enriched.map(({ dto, card }, i) => ({
     restaurant: card,
