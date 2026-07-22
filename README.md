@@ -87,8 +87,8 @@
 | **Language** | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white) |
 | **Framework** | ![React](https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black) ![Apps in Toss](https://img.shields.io/badge/Apps_in_Toss_web--framework-0064FF?logo=toss&logoColor=white) |
 | **Build** | ![Vite](https://img.shields.io/badge/Vite-646CFF?logo=vite&logoColor=white) ![granite](https://img.shields.io/badge/granite-ait-000000) |
-| **UI** | ![TDS Mobile](https://img.shields.io/badge/@toss/tds--mobile-0064FF?logo=toss&logoColor=white) `primaryColor #FF5F00` |
-| **State / Data** | ![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?logo=reactquery&logoColor=white) 폴링·캐싱·게이팅 |
+| **UI** | ![TDS Mobile](https://img.shields.io/badge/@toss/tds--mobile-0064FF?logo=toss&logoColor=white) |
+| **State / Data** | ![TanStack Query](https://img.shields.io/badge/TanStack_Query-FF4154?logo=reactquery&logoColor=white) |
 | **Test** | ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?logo=vitest&logoColor=white) ![MSW](https://img.shields.io/badge/MSW-mock-FF6A33) ![Storybook](https://img.shields.io/badge/Storybook-FF4785?logo=storybook&logoColor=white) |
 
 > 백엔드: Supabase Edge Function `api` — [NyamNyam-Together](https://github.com/polytech-zero-day/NyamNyam-Together)
