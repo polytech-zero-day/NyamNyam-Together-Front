@@ -97,19 +97,9 @@
 
 ## 화면 흐름
 
-```mermaid
-flowchart TD
-    subgraph H["호스트"]
-        intro[인트로] --> welcome[웰컴] --> login[토스 로그인] --> create[모임 생성] --> invite[초대 링크]
-    end
-    subgraph P["참여자"]
-        onboard[참여자 온보딩] --> pref[취향 입력] --> food[음식 선택] --> sort[정렬 선택]
-    end
-    invite -.초대 링크 공유.-> onboard
-    sort --> qdone[취향 제출 · 대기] --> finding[추천 로딩]
-    finding --> vote[후보 투표] --> waiting[전원 투표 대기]
-    waiting --> counting[집계 중] --> result[최종 결과]
-```
+Figma로 설계한 화면설계서(v2.1) — 앱 진입·로그인, 모임 생성, 참여자 투표·결과까지 21개 화면 + 9개 바텀시트를 흐름별로 정리했습니다.
+
+<div align="center"><img src="docs/assets/screen-design.png" width="820" alt="냠냠투게더 화면설계서"/></div>
 
 - **집계 게이팅**: 취향을 제출한 사용자는 대기 화면에 머물며, **집계 완료(status=voting)** 를 폴링해 준비되면 자동 전환합니다.
 - **정렬**: 정렬 기준은 참여자 다수결로 백엔드에서 결정되며, 프론트는 그 순서를 그대로 표시합니다.
