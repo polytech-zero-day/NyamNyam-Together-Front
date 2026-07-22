@@ -60,15 +60,15 @@
 
 ## 팀 소개
 
-> 🎉 **제로 데이(Zero Day)** — 광명폴리텍대학교 데이터분석과
+> 🎉 **제로 데이(Zero Day)**
 
 | 이름 | 역할 | 주요 담당 |
 | :---: | :---: | :--- |
 | **한성민** ([@kkx7787](https://github.com/kkx7787)) | PM · 백엔드 | 프로그램 총괄 · 문서화 · 프론트/백 API 연동 |
-| **고윤** | 백엔드 | DB 스키마·RLS · 세션/투표/집계 API · 인증 미들웨어 |
-| **양은영** | 백엔드 | 추천 엔진 · Google Places(New) 연동 · 도메인 로직 |
-| **윤여훈** | UI · 프론트엔드 | 화면설계 · 프론트 화면/기능 구현 · 단위·통합 테스트 |
-| **차윤희** | UI · 프론트엔드 | 화면설계(Figma) · 프론트 화면/기능 구현 · 테스트 · 문서화 |
+| **고윤** ([@K-yoon03](https://github.com/K-yoon03)) | 백엔드 | DB 스키마·RLS · 세션/투표/집계 API · 인증 미들웨어 |
+| **양은영** ([@yangtori0407](https://github.com/yangtori0407)) | 백엔드 | 추천 엔진 · Google Places(New) 연동 · 도메인 로직 |
+| **윤여훈** ([@Hoon-KR](https://github.com/Hoon-KR)) | UI · 프론트엔드 | 화면설계 · 프론트 화면/기능 구현 · 단위·통합 테스트 |
+| **차윤희** ([@chayh414](https://github.com/chayh414)) | UI · 프론트엔드 | 화면설계(Figma) · 프론트 화면/기능 구현 · 테스트 · 문서화 |
 
 <br>
 
@@ -77,8 +77,6 @@
 - **전체 기간**: 2026년 6월 19일(금) ~ 2026년 6월 26일(금)
 - **발표**: 2026년 6월 26일(금) 15:30 — 제로 데이
 - **배포**: 앱인토스 콘솔 등록 · 출시 완료
-
-> 주요 변경 이력: ① 화면 구현을 앱빌더(App Builder)에서 Figma + TDS Mobile 직접 구현으로 전환(6/23) ② 21개 화면 + 9개 바텀시트 재구현
 
 <br>
 
@@ -145,8 +143,6 @@ flowchart TD
 
 <div align="center"><img src="docs/assets/vote.gif" width="260" alt="추천 · 투표 · 확정"/></div>
 
-> 데모 GIF는 MSW 목 데이터(`VITE_USE_MOCK=true`)로 녹화했습니다. 실제 후보·사진은 Google Places 라이브 데이터입니다.
-
 <br>
 
 ## 프로젝트 구조
@@ -174,18 +170,6 @@ npm run storybook    # 스토리북
 npm run build        # ait build → dist/ + .ait
 npm run deploy       # ait deploy (앱인토스 콘솔 버전 등록)
 ```
-
-환경변수(`.env.local`):
-```
-VITE_API_BASE_URL=https://<ref>.supabase.co/functions/v1/api
-VITE_SUPABASE_ANON_KEY=sb_publishable_...
-VITE_ENABLE_DEV_LOGIN=true     # 토스 로그인 실패 시 dev-login 우회(개발용)
-VITE_USE_MOCK=false            # true면 MSW 목 사용(백엔드 없이 전체 흐름 구동)
-```
-
-- 콘솔 API 키: [앱인토스 콘솔](https://apps-in-toss.toss.im/) > 워크스페이스 > API 키.
-- 등록된 버전은 콘솔 "앱 출시"에서 **테스트**(샌드박스) → **검토 요청**(실출시).
-- CI/CD: `.github/workflows/` — `main` push 시 lint·test·storybook + `.ait` 빌드·배포.
 
 <br>
 
